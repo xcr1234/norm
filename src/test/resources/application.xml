@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:p="http://www.springframework.org/schema/p" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/aop
+		http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/jee
+		http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+		http://www.springframework.org/schema/task
+		  http://www.springframework.org/schema/task/spring-task-3.1.xsd
+		">
+
+
+
+
+
+	<bean class="norm.Configuration" id="configuration">
+		<property name="driverClass" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/test?useSSL=false"/>
+		<property name="username" value="root"/>
+		<property name="password" value="root"/>
+		<property name="showSql" value="true"/>
+		<property name="formatSql" value="false"/>
+		<property name="cacheManager">
+			<bean class="norm.cache.LruCacheManager">
+				<constructor-arg value="10" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean class="norm.Norm" id="norm">
+		<property name="configuration" ref="configuration" />
+	</bean>
+
+	<!--Norm框架在Spring中配置的核心，传入一个norm参数，表示数据库连接的配置信息-->
+	<bean class="norm.support.spring.NormContext">
+		<property name="norm" ref="norm" />
+	</bean>
+
+
+	<bean class="norm.test.service.TestService" id="testService"></bean>
+
+</beans>
