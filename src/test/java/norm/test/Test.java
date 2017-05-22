@@ -4,12 +4,14 @@ import norm.Configuration;
 import norm.Databases;
 import norm.JdbcDrivers;
 import norm.Norm;
+import norm.NormAware;
 import norm.Norms;
 import norm.page.Page;
 import norm.page.Pages;
 import norm.test.dao.UserDao;
 import norm.test.entity.User;
 
+import java.sql.Connection;
 import java.util.List;
 
 
@@ -73,5 +75,20 @@ public class Test {
         //norm1.setDriverClass("xxx").setUrl().setUsername().setPassword();
         //Norm norm2 = new Norm();
         //norm2.setDriverClass("xxx").setUrl().setUsername().setPassword();
+
+
+        //所有的Norm dao、Norm service都是实现了NormAware接口的，因此可以方便的取出Norm对象.
+        NormAware normAware = (NormAware)userDao;
+        Norm norm = normAware.__getNormObject();
+        System.out.println(norm.getDriverClass());
+        System.out.println(norm.getUsername());
+
+        //事务
+        //norm.getTransactional().begin(); //开始事务
+        //
+        //norm.getTransactional().commit(); //结束事务
+
+        //手动得到Connection（记得close）
+        //Connection connection = norm.getConnection();
     }
 }

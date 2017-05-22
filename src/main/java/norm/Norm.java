@@ -31,9 +31,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Norm框架的核心类
  */
-public final class Norm implements Serializable{
+public class Norm{
 
-    private static final long serialVersionUID = -4345155301336226577L;
+
     private Configuration configuration;
     private ThreadLocal<Connection> connectionThreadLocal = new ThreadLocal<Connection>();
     private Transactional transactional = new Transactional(this);
@@ -121,7 +121,7 @@ public final class Norm implements Serializable{
             throw new BeanException("illegal bean,id type mismatch :" + tClass +",dao:"+daoClass);
         }
         Enhancer enhancer = new Enhancer();
-        enhancer.setInterfaces(new Class[]{daoClass});
+        enhancer.setInterfaces(new Class[]{daoClass,NormAware.class});
         enhancer.setCallbacks(new Callback[]{new DaoInterceptor(tClass,daoClass,this), NoOp.INSTANCE});
         enhancer.setCallbackFilter(MethodFilter.getInstance());
         return (Dao) enhancer.create();
@@ -189,6 +189,7 @@ public final class Norm implements Serializable{
         if(value == null){
             Enhancer enhancer = new Enhancer();
             enhancer.setSuperclass(serviceClass);
+            enhancer.setInterfaces(new Class[]{NormAware.class});
             enhancer.setCallbackFilter(MethodFilter.getInstance());
             enhancer.setCallbacks(new Callback[]{new ServiceInterceptor(serviceClass,this), NoOp.INSTANCE});
             value = enhancer.create();

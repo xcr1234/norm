@@ -27,6 +27,7 @@ public class BeanInterceptor implements MethodInterceptor {
     @SuppressWarnings("unchecked")
     @Override
     public Object intercept(Object self, Method thisMethod, Object[] args, MethodProxy proxy) throws Throwable {
+
         if(BeanUtils.isGetter(thisMethod)){
             String entity = BeanUtils.getEntity(thisMethod);
             ColumnMeta columnMeta = meta.getColumnMetas().get(entity);

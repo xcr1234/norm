@@ -15,8 +15,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public final class Configuration implements Serializable{
-    private static final long serialVersionUID = -376848911923359689L;
+public class Configuration {
     private boolean formatSql;
     private boolean showSql;
     private DataSource dataSource;
@@ -26,11 +25,11 @@ public final class Configuration implements Serializable{
     private String password;
     private Properties info;
     private TableNameStrategy tableNameStrategy;
-    private transient SQLLogger sqlLogger;
+    private SQLLogger sqlLogger;
     private boolean driverRegistered;
     private int maxRecursion = 3;
-    private transient CacheManager cacheManager;
-    private transient SQLFormatter sqlFormatter = new BasicFormatterImpl();
+    private CacheManager cacheManager;
+    private SQLFormatter sqlFormatter = new BasicFormatterImpl();
 
     public Configuration() {
     }

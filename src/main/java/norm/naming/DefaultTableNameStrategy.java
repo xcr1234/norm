@@ -6,7 +6,6 @@ package norm.naming;
 public class DefaultTableNameStrategy implements TableNameStrategy {
 
     public static final DefaultTableNameStrategy DEFAULT = new DefaultTableNameStrategy();
-    private static final long serialVersionUID = 5124487440007698815L;
 
     @Override
     public String format(String className) {

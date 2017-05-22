@@ -4,7 +4,6 @@ package norm.naming;
  * 下划线命名策略，将类名转换为下划线形式，例如UserInfo -&gt; user_info
  */
 public class UnderLineTableNameStrategy implements TableNameStrategy{
-    private static final long serialVersionUID = -8484600987631773865L;
 
     @Override
     public String format(String className) {

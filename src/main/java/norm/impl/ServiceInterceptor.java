@@ -35,6 +35,9 @@ public class ServiceInterceptor implements MethodInterceptor {
 
     @Override
     public Object intercept(Object self, Method thisMethod, Object[] args, MethodProxy proxy) throws Throwable {
+        if("__getNormObject".equals(thisMethod.getName()) && Norm.class.equals(thisMethod.getReturnType())){
+            return norm;
+        }
         boolean trans = false;
         try {
             if(thisMethod.isAnnotationPresent(Transaction.class)){
