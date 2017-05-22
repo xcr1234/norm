@@ -12,3 +12,6 @@ Maven:
 下载：
 
 https://pan.baidu.com/s/1dE7HipF
+
+
+[wiki](https://github.com/xcr1234/norm/wiki/Norm---%E6%95%B0%E6%8D%AE%E5%BA%93%E6%93%8D%E4%BD%9C%E7%AB%9F%E7%84%B6%E5%8F%AF%E4%BB%A5%E5%A6%82%E6%AD%A4%E7%AE%80%E5%8D%95)
