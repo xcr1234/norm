@@ -2,7 +2,8 @@ package norm.util;
 
 import norm.SQLFormatter;
 
-import java.io.Serializable;
+
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -11,7 +12,14 @@ import java.util.StringTokenizer;
 /**
  * sql格式化工具(从hibernate中弄出来的)
  */
-public class BasicFormatterImpl implements SQLFormatter,Serializable {
+public class BasicFormatterImpl implements SQLFormatter {
+
+    private static final BasicFormatterImpl BASIC_FORMATTER = new BasicFormatterImpl();
+
+    public static BasicFormatterImpl getInstance(){
+        return BASIC_FORMATTER;
+    }
+
     private static final Set<String> BEGIN_CLAUSES = new HashSet<String>();
     private static final Set<String> END_CLAUSES = new HashSet<String>();
     private static final Set<String> LOGICAL = new HashSet<String>();
@@ -20,7 +28,7 @@ public class BasicFormatterImpl implements SQLFormatter,Serializable {
     private static final Set<String> MISC = new HashSet<String>();
     static final String indentString = "    ";
     static final String initial = "\n    ";
-    private static final long serialVersionUID = 982403769611088997L;
+
 
     public String format(String source)
     {
@@ -64,8 +72,8 @@ public class BasicFormatterImpl implements SQLFormatter,Serializable {
 
         MISC.add("select");
         MISC.add("on"); }
-    private static class FormatProcess implements Serializable {
-        private static final long serialVersionUID = -313234954986706495L;
+    private static class FormatProcess {
+
         boolean beginLine = true;
         boolean afterBeginBeforeEnd = false;
         boolean afterByOrSetOrFromOrSelect = false;

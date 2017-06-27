@@ -5,7 +5,11 @@ import norm.SQLLogger;
 
 public final class DefaultSQLLogger implements SQLLogger {
 
-    public static final DefaultSQLLogger DEFAULT = new DefaultSQLLogger();
+    private static final DefaultSQLLogger DEFAULT = new DefaultSQLLogger();
+
+    public static DefaultSQLLogger getInstance(){
+        return DEFAULT;
+    }
 
     @Override
     public void logSQL(String sql) {

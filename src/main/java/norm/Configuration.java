@@ -6,20 +6,20 @@ import norm.impl.DefaultSQLLogger;
 import norm.naming.DefaultTableNameStrategy;
 import norm.naming.TableNameStrategy;
 import norm.util.Args;
-import norm.util.BasicFormatterImpl;
+
 
 import javax.sql.DataSource;
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public class Configuration {
+public final class Configuration {
     private boolean formatSql;
     private boolean showSql;
     private DataSource dataSource;
     private String driverClass;
+    private String schema;
     private String url;
     private String username;
     private String password;
@@ -29,7 +29,7 @@ public class Configuration {
     private boolean driverRegistered;
     private int maxRecursion = 3;
     private CacheManager cacheManager;
-    private SQLFormatter sqlFormatter = new BasicFormatterImpl();
+    private SQLFormatter sqlFormatter;
 
     public Configuration() {
     }
@@ -85,6 +85,14 @@ public class Configuration {
     public void setDriverClass(String driverClass) {
         driverRegistered = false;
         this.driverClass = driverClass;
+    }
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(String schema) {
+        this.schema = schema;
     }
 
     public int getMaxRecursion() {
@@ -148,7 +156,7 @@ public class Configuration {
         throw new QueryException("the connection of the Configuration hasn't be configured!");
     }
 
-    public void registerDriver() throws ClassNotFoundException {
+    void registerDriver() throws ClassNotFoundException {
         if(driverClass != null){
             Class.forName(driverClass);
             driverRegistered = true;
@@ -156,7 +164,7 @@ public class Configuration {
     }
 
     public SQLLogger getSqlLogger() {
-        return sqlLogger == null ? DefaultSQLLogger.DEFAULT : sqlLogger;
+        return sqlLogger == null ? DefaultSQLLogger.getInstance() : sqlLogger;
     }
 
     public void setSqlLogger(SQLLogger sqlLogger) {

@@ -12,16 +12,52 @@ import java.util.Properties;
 /**
  * Norms中维护了一个全局的{@link norm.Norm}静态变量
  */
-public final class Norms {
+public final class Norms  {
+
+    private Norms(){}
+
     private static Norm norm = new Norm();
 
     public static Norm getNorm() {
+        assert  norm != null;
         return norm;
     }
 
     public static void setNorm(Norm norm) {
         Args.notNull(norm,"default norm");
         Norms.norm = norm;
+    }
+
+    public static void closeConnection() {
+        norm.closeConnection();
+    }
+
+    public static Object enableCache(Object object) {
+        return norm.enableCache(object);
+    }
+
+    public static <Service> Service createService(Class<Service> serviceClass) {
+        return norm.createService(serviceClass);
+    }
+
+    public static boolean isFormat_sql() {
+        return norm.isFormat_sql();
+    }
+
+    public static void setFormat_sql(boolean format_sql) {
+        norm.setFormat_sql(format_sql);
+    }
+
+    public static boolean isShow_sql() {
+        return norm.isShow_sql();
+    }
+
+    public static void setShow_sql(boolean show_sql) {
+        norm.setShow_sql(show_sql);
+    }
+
+    public static void showSQL(String sql) {
+        norm.showSQL(sql);
     }
 
     public static Transactional getTransactional() {
@@ -40,121 +76,120 @@ public final class Norms {
         return norm.createDao(daoClass);
     }
 
-    public static Properties getInfo() {
-        return getConfiguration().getInfo();
+    public static Connection getConnection() {
+        return norm.getConnection();
     }
 
-    public static void setInfo(Properties info) {
-        getConfiguration().setInfo(info);
+    public static String getSchema() {
+        return norm.getSchema();
     }
 
-    public static DataSource getDataSource() {
-        return getConfiguration().getDataSource();
-    }
-
-    public static void setDataSource(DataSource dataSource) {
-        getConfiguration().setDataSource(dataSource);
-    }
-
-    public static String getDriverClass() {
-        return getConfiguration().getDriverClass();
-    }
-
-    public static void setDriverClass(String driverClass) {
-        getConfiguration().setDriverClass(driverClass);
-    }
-
-    public static int getMaxRecursion() {
-        return getConfiguration().getMaxRecursion();
-    }
-
-    public static void setMaxRecursion(int maxRecursion) {
-        getConfiguration().setMaxRecursion(maxRecursion);
-    }
-
-    public static String getUrl() {
-        return getConfiguration().getUrl();
-    }
-
-    public static void setUrl(String url) {
-        getConfiguration().setUrl(url);
-    }
-
-    public static String getUsername() {
-        return getConfiguration().getUsername();
-    }
-
-    public static void setUsername(String username) {
-        getConfiguration().setUsername(username);
-    }
-
-    public static String getPassword() {
-        return getConfiguration().getPassword();
-    }
-
-    public static void setPassword(String password) {
-        getConfiguration().setPassword(password);
-    }
-
-
-    public static Connection getConnection() throws SQLException {
-        return getConfiguration().getConnection();
-    }
-
-    public static void registerDriver() throws ClassNotFoundException {
-        getConfiguration().registerDriver();
+    public static Norm setSchema(String schema) {
+        return norm.setSchema(schema);
     }
 
     public static SQLLogger getSqlLogger() {
-        return getConfiguration().getSqlLogger();
+        return norm.getSqlLogger();
     }
 
-    public static void setSqlLogger(SQLLogger sqlLogger) {
-        getConfiguration().setSqlLogger(sqlLogger);
+    public static Norm setSqlLogger(SQLLogger sqlLogger) {
+       return norm.setSqlLogger(sqlLogger);
     }
 
     public static TableNameStrategy getTableNameStrategy() {
-        return getConfiguration().getTableNameStrategy();
+        return norm.getTableNameStrategy();
     }
 
-    public static void setTableNameStrategy(TableNameStrategy tableNameStrategy) {
-        getConfiguration().setTableNameStrategy(tableNameStrategy);
+    public static Norm setTableNameStrategy(TableNameStrategy tableNameStrategy) {
+        return norm.setTableNameStrategy(tableNameStrategy);
     }
-
 
     public static CacheManager getCacheManager() {
-        return getConfiguration().getCacheManager();
+        return norm.getCacheManager();
     }
 
-    public static void setCacheManager(CacheManager cacheManager) {
-        getConfiguration().setCacheManager(cacheManager);
+    public static Norm setCacheManager(CacheManager cacheManager) {
+        return norm.setCacheManager(cacheManager);
+    }
+
+    public static Properties getInfo() {
+        return norm.getInfo();
+    }
+
+    public static Norm setInfo(Properties info) {
+        return norm.setInfo(info);
+    }
+
+    public static DataSource getDataSource() {
+        return norm.getDataSource();
+    }
+
+    public static Norm setDataSource(DataSource dataSource) {
+        return norm.setDataSource(dataSource);
+    }
+
+    public static String getDriverClass() {
+        return norm.getDriverClass();
+    }
+
+    public static Norm setDriverClass(String driverClass) {
+        return norm.setDriverClass(driverClass);
+    }
+
+    public static int getMaxRecursion() {
+        return norm.getMaxRecursion();
+    }
+
+    public static Norm setMaxRecursion(int maxRecursion) {
+        return norm.setMaxRecursion(maxRecursion);
+    }
+
+    public static String getUrl() {
+        return norm.getUrl();
+    }
+
+    public static Norm setUrl(String url) {
+        return norm.setUrl(url);
+    }
+
+    public static String getUsername() {
+        return norm.getUsername();
+    }
+
+    public static Norm setUsername(String username) {
+        return norm.setUsername(username);
+    }
+
+    public static String getPassword() {
+        return norm.getPassword();
+    }
+
+    public static Norm setPassword(String password) {
+        return norm.setPassword(password);
     }
 
     public static boolean isFormatSql() {
-        return getConfiguration().isFormatSql();
+        return norm.isFormatSql();
     }
 
-    public static void setFormatSql(boolean formatSql) {
-        getConfiguration().setFormatSql(formatSql);
+    public static Norm setFormatSql(boolean formatSql) {
+        return norm.setFormatSql(formatSql);
     }
 
     public static boolean isShowSql() {
-        return getConfiguration().isShowSql();
+        return norm.isShowSql();
     }
 
-    public static void setShowSql(boolean showSql) {
-        getConfiguration().setShowSql(showSql);
+    public static Norm setShowSql(boolean showSql) {
+        return norm.setShowSql(showSql);
     }
 
-    public static boolean isDriverRegistered() {
-        return getConfiguration().isDriverRegistered();
-    }
 
     public static SQLFormatter getSqlFormatter() {
-        return getConfiguration().getSqlFormatter();
+        return norm.getSqlFormatter();
     }
 
-    public static void setSqlFormatter(SQLFormatter sqlFormatter) {
-        getConfiguration().setSqlFormatter(sqlFormatter);
+    public static Norm setSqlFormatter(SQLFormatter sqlFormatter) {
+        return norm.setSqlFormatter(sqlFormatter);
     }
 }

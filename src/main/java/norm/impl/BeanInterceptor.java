@@ -37,7 +37,7 @@ public class BeanInterceptor implements MethodInterceptor {
                 if(thisMethod.getReturnType() != List.class && thisMethod.getReturnType() != ArrayList.class){
                     throw new BeanException("illegal join column :" + columnMeta+",return type must be java.util.List");
                 }
-                Meta targetMeta = Meta.parse(joinColumn.target(),meta.getTableNameStrategy());
+                Meta targetMeta = Meta.parse(joinColumn.target(),meta.getConfiguration());
                 ColumnMeta targetColumn = targetMeta.getColumnMetas().get(joinColumn.mappedBy());
                 if(targetColumn == null){
                     throw new BeanException("illegal join column :" + columnMeta+" ,target column not found:"+joinColumn.target()+"#"+joinColumn.mappedBy());

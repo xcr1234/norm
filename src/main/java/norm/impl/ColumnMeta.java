@@ -38,7 +38,7 @@ public final class ColumnMeta {
         if(getter != null){
             return getter.getReturnType();
         }else if(field != null){
-            return field.getDeclaringClass();
+            return field.getType();
         }else if(setter != null){
             return setter.getParameterTypes()[0];
         }
@@ -130,7 +130,7 @@ public final class ColumnMeta {
             Reference reference = getAnnotation(Reference.class);
             if(reference != null && value != null){
                 Class type = getType();
-                return Meta.parse(type,meta.getTableNameStrategy()).getColumnMetas().get(reference.target()).get(value);
+                return Meta.parse(type,meta.getConfiguration()).getColumnMetas().get(reference.target()).get(value);
             }
             return value;
         } catch (IllegalAccessException e) {

@@ -2,6 +2,7 @@ package norm.impl;
 
 
 import norm.BeanException;
+import norm.Configuration;
 import norm.QueryException;
 import norm.naming.TableNameStrategy;
 import norm.result.QueryResult;
@@ -38,10 +39,10 @@ public final class QueryResultImpl implements QueryResult,Serializable {
         return ognlContexts;
     }
 
-    private TableNameStrategy tableNameStrategy;
+    private Configuration configuration;
 
-    public QueryResultImpl(ResultSet resultSet, TableNameStrategy tableNameStrategy) throws SQLException {
-        this.tableNameStrategy = tableNameStrategy;
+    public QueryResultImpl(ResultSet resultSet, Configuration configuration) throws SQLException {
+        this.configuration = configuration;
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
         Map<Integer, String> labelIndexMap = new HashMap<Integer, String>();
         for(int i = 1; i<=resultSetMetaData.getColumnCount(); i++){
@@ -94,7 +95,7 @@ public final class QueryResultImpl implements QueryResult,Serializable {
         //保证AfterInstance方法被执行
         if(value != null){
             try {
-                Meta meta = Meta.parse(value.getClass(),tableNameStrategy);
+                Meta meta = Meta.parse(value.getClass(),configuration);
                 for(Method after:meta.getAfterInstanceMethods()){
                     try {
                         boolean access = after.isAccessible();

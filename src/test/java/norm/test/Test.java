@@ -90,5 +90,7 @@ public class Test {
 
         //手动得到Connection（记得close）
         //Connection connection = norm.getConnection();
+
+        //System.out.println(userDao.getClass());
     }
 }

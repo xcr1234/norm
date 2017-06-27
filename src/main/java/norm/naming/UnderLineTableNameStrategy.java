@@ -7,10 +7,9 @@ public class UnderLineTableNameStrategy implements TableNameStrategy{
 
     @Override
     public String format(String className) {
-        StringBuilder sb = new StringBuilder();
-        char[] chars = className.toCharArray();
-        for (int i=0;i<chars.length;i++) {
-            char c = chars[i];
+        StringBuilder sb = new StringBuilder(className.length() + 6);
+        for(int i=0;i<className.length();i++){
+            char c = className.charAt(i);
             if(Character.isUpperCase(c)){
                 if(i > 0){
                     sb.append('_');

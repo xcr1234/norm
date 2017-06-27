@@ -6,6 +6,7 @@ import net.sf.cglib.proxy.NoOp;
 
 import norm.CrudDao;
 import norm.Norm;
+import norm.NormAware;
 import norm.QueryException;
 
 import norm.anno.Id;
@@ -30,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * {@link CrudDao}接口的实现类，用该类来实现动态代理
  */
-public final class CrudDaoImpl implements CrudDao<Object, Object> {
+public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
 
     private static Map<Entry,CrudDaoImpl> entryCrudDaoMap = new ConcurrentHashMap<Entry,CrudDaoImpl>();
 
@@ -39,7 +40,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object> {
 
     public CrudDaoImpl(Class<?> type, Norm norm) {
         this.norm = norm;
-        this.meta = Meta.parse(type, norm.getTableNameStrategy());
+        this.meta = Meta.parse(type, norm.getConfiguration());
     }
 
 
@@ -51,6 +52,11 @@ public final class CrudDaoImpl implements CrudDao<Object, Object> {
             entryCrudDaoMap.put(entry,crudDao);
         }
         return crudDao;
+    }
+
+    @Override
+    public Norm __getNormObject() {
+        return norm;
     }
 
     private static class Entry{
@@ -328,7 +334,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object> {
                     if(recursion > norm.getConfiguration().getMaxRecursion()){
                         cm.set(object,null);
                     }else{
-                        Meta targetMeta = Meta.parse(cm.getType(),norm.getTableNameStrategy());
+                        Meta targetMeta = Meta.parse(cm.getType(),norm.getConfiguration());
                         ColumnMeta targetColumn = targetMeta.getColumnMetas().get(reference.target());
                         Object referenceValue = ResultSetHandler.get(rs,cm.getName(),targetColumn.getType(),cm.toString());
                         Object value = findByColumn(referenceValue,targetMeta,targetColumn,recursion+1);
@@ -477,7 +483,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object> {
                 pageable.setState(ps,i);
             }
             rs = ps.executeQuery();
-            return new QueryResultImpl(rs,norm.getTableNameStrategy());
+            return new QueryResultImpl(rs,norm.getConfiguration());
         } catch (SQLException e) {
             handleError(connection,e);
             return null;
@@ -530,6 +536,10 @@ public final class CrudDaoImpl implements CrudDao<Object, Object> {
             closeObjects(connection,ps,rs);
         }
     }
+
+
+
+
 
 
     private Object createObject(Meta meta){

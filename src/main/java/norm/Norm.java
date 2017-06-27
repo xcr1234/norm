@@ -12,6 +12,7 @@ import norm.impl.ObjectServiceInterceptor;
 import norm.impl.ServiceInterceptor;
 import norm.naming.TableNameStrategy;
 import norm.util.Args;
+import norm.util.BasicFormatterImpl;
 import norm.util.BeanUtils;
 
 
@@ -31,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Norm框架的核心类
  */
-public class Norm{
+public final class Norm{
 
 
     private Configuration configuration;
@@ -48,9 +49,7 @@ public class Norm{
     }
 
     public Norm(Configuration configuration){
-        if(configuration == null){
-            throw new NullPointerException();
-        }
+        Args.notNull(configuration,"configuration");
         this.configuration = configuration;
     }
 
@@ -74,16 +73,14 @@ public class Norm{
         return connection;
     }
 
-    public void registerDriver() throws ClassNotFoundException {
-        configuration.registerDriver();
-    }
 
     public SQLLogger getSqlLogger() {
         return configuration.getSqlLogger();
     }
 
-    public void setSqlLogger(SQLLogger sqlLogger) {
+    public Norm setSqlLogger(SQLLogger sqlLogger) {
         configuration.setSqlLogger(sqlLogger);
+        return this;
     }
 
     public void setConfiguration(Configuration configuration) {
@@ -92,6 +89,7 @@ public class Norm{
     }
 
     public Transactional getTransactional() {
+        assert transactional != null;
         return transactional;
     }
 
@@ -105,8 +103,11 @@ public class Norm{
     }
 
     public Configuration getConfiguration() {
+        assert  configuration != null;
         return configuration;
     }
+
+
 
     private Map<Class,Object> daoCache = new ConcurrentHashMap<Class,Object>();
     private Map<Class,Object> serviceCache = new ConcurrentHashMap<Class,Object>();
@@ -116,7 +117,7 @@ public class Norm{
         if(Modifier.isFinal(tClass.getModifiers()) || Modifier.isAbstract(tClass.getModifiers())){
             throw new BeanException("entity class can't be final or abstract :"+tClass);
         }
-        Meta meta = Meta.parse(tClass,getTableNameStrategy());
+        Meta meta = Meta.parse(tClass,configuration);
         if(meta.getIdColumn().getType() != idClass){
             throw new BeanException("illegal bean,id type mismatch :" + tClass +",dao:"+daoClass);
         }
@@ -202,32 +203,45 @@ public class Norm{
         return configuration.getTableNameStrategy();
     }
 
-    public void setTableNameStrategy(TableNameStrategy tableNameStrategy) {
+    public Norm setTableNameStrategy(TableNameStrategy tableNameStrategy) {
         configuration.setTableNameStrategy(tableNameStrategy);
+        return this;
     }
 
     public CacheManager getCacheManager() {
         return configuration.getCacheManager();
     }
 
-    public void setCacheManager(CacheManager cacheManager) {
+    public Norm setCacheManager(CacheManager cacheManager) {
         configuration.setCacheManager(cacheManager);
+        return this;
+    }
+
+    public String getSchema() {
+        return configuration.getSchema();
+    }
+
+    public Norm setSchema(String schema) {
+        configuration.setSchema(schema);
+        return this;
     }
 
     public boolean isFormat_sql() {
         return configuration.isFormatSql();
     }
 
-    public void setFormat_sql(boolean format_sql) {
+    public Norm setFormat_sql(boolean format_sql) {
         configuration.setFormatSql(format_sql);
+        return this;
     }
 
     public boolean isShow_sql() {
         return configuration.isShowSql();
     }
 
-    public void setShow_sql(boolean show_sql) {
+    public Norm setShow_sql(boolean show_sql) {
         configuration.setShowSql(show_sql);
+        return this;
     }
 
     public void showSQL(String sql){
@@ -242,17 +256,7 @@ public class Norm{
         }
     }
 
-    private void writeObject(java.io.ObjectOutputStream out) throws IOException{
-        out.writeObject(configuration);
-    }
 
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
-        configuration = (Configuration) in.readObject();
-        connectionThreadLocal = new ThreadLocal<Connection>();
-        transactional = new Transactional(this);
-        daoCache = new ConcurrentHashMap<Class,Object>();
-        serviceCache = new ConcurrentHashMap<Class,Object>();
-    }
 
     public Properties getInfo() {
         return configuration.getInfo();
@@ -321,27 +325,28 @@ public class Norm{
         return configuration.isFormatSql();
     }
 
-    public void setFormatSql(boolean formatSql) {
+    public Norm setFormatSql(boolean formatSql) {
         configuration.setFormatSql(formatSql);
+        return this;
     }
 
     public boolean isShowSql() {
         return configuration.isShowSql();
     }
 
-    public void setShowSql(boolean showSql) {
+    public Norm setShowSql(boolean showSql) {
         configuration.setShowSql(showSql);
+        return this;
     }
 
-    public boolean isDriverRegistered() {
-        return configuration.isDriverRegistered();
-    }
 
     public SQLFormatter getSqlFormatter() {
-        return configuration.getSqlFormatter();
+        SQLFormatter formatter = configuration.getSqlFormatter();
+        return formatter == null ? BasicFormatterImpl.getInstance() : formatter;
     }
 
-    public void setSqlFormatter(SQLFormatter sqlFormatter) {
+    public Norm setSqlFormatter(SQLFormatter sqlFormatter) {
         configuration.setSqlFormatter(sqlFormatter);
+        return this;
     }
 }

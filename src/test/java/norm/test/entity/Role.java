@@ -4,6 +4,8 @@ package norm.test.entity;
 import norm.anno.Column;
 import norm.anno.Id;
 import norm.anno.Reference;
+import norm.anno.Table;
+
 
 public class Role {
 

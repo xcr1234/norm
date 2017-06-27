@@ -8,7 +8,7 @@ public interface JdbcDrivers {
     String ORACLE = "oracle.jdbc.driver.OracleDriver";
     String DB2 = "com.ibm.db2.jcc.DB2Driver";
     String SYBASE = "com.sybase.jdbc.SybDriver";
-    String POSTGRESQL = "org.postgresql.Driver";
+    String POSTGRESQL = "org.postgresql.";
     String SQLSERVER = "com.microsoft.jdbc.sqlserver.SQLServerDriver";
     String JTDS = "net.sourceforge.jtds.jdbc.Driver";
     String INFORMIX = "com.informix.jdbc.IfxDriver";
@@ -17,4 +17,6 @@ public interface JdbcDrivers {
     String NETEZZA = "org.netezza.Driver";
     String H2 = "org.h2.Driver";
     String SQLITE = "org.sqlite.JDBC";
+    String DERBY = "org.apache.derby.jdbc.ClientDriver";
+    String DERBY_EMBED = "org.apache.derby.jdbc.EmbeddedDriver";
 }

@@ -4,6 +4,7 @@ package norm.support.spring;
 
 import norm.CrudDao;
 import norm.Norm;
+import norm.NormAware;
 import norm.Norms;
 import org.springframework.beans.BeansException;
 
@@ -30,7 +31,7 @@ import java.lang.reflect.Field;
  *
  * </pre>
  */
-public final class NormContext  implements BeanPostProcessor,ApplicationContextAware {
+public final class NormContext  implements BeanPostProcessor,ApplicationContextAware, NormAware {
 
     private ApplicationContext applicationContext;
     private Norm norm;
@@ -103,5 +104,10 @@ public final class NormContext  implements BeanPostProcessor,ApplicationContextA
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    @Override
+    public Norm __getNormObject() {
+        return norm == null ? Norms.getNorm() : norm;
     }
 }

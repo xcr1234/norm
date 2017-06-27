@@ -15,11 +15,11 @@ import java.sql.SQLException;
  * 一般的，回滚（rollback）操作会在发生{@link SQLException}时自动触发，无需手动执行。
  * </pre>
  */
-public final class Transactional {
+public final class Transactional implements NormAware {
 
     private Norm norm;
 
-    public Transactional(Norm norm) {
+    Transactional(Norm norm) {
         Args.notNull(norm,"norm");
         this.norm = norm;
     }
@@ -83,5 +83,10 @@ public final class Transactional {
                 } catch (SQLException e) {}
             }
         }
+    }
+
+    @Override
+    public Norm __getNormObject() {
+        return norm;
     }
 }

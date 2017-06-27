@@ -23,5 +23,6 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.springframework:spring-aop:4.2.5.RELEASE" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: aopalliance:aopalliance:1.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.springframework:spring-expression:4.2.5.RELEASE" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.xerial:sqlite-jdbc:3.7.2" level="project" />
   </component>
 </module>

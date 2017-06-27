@@ -25,7 +25,7 @@ public final class DaoInterceptor implements MethodInterceptor {
     private Norm norm;
 
     public DaoInterceptor(Class c, Class daoClass, Norm norm){
-        meta = Meta.parse(c,norm.getTableNameStrategy());
+        meta = Meta.parse(c,norm.getConfiguration());
         this.daoClass = daoClass;
         this.norm = norm;
         dbDao = CrudDaoImpl.create(c,norm);
@@ -34,9 +34,6 @@ public final class DaoInterceptor implements MethodInterceptor {
 
     @Override
     public Object intercept(Object self, Method thisMethod, Object[] args, MethodProxy proxy) throws Throwable {
-        if("__getNormObject".equals(thisMethod.getName()) && Norm.class.equals(thisMethod.getReturnType())){
-            return norm;
-        }
         if(thisMethod.isAnnotationPresent(Query.class)){
             Query query = thisMethod.getAnnotation(Query.class);
             if(thisMethod.getReturnType() == QueryResult.class){

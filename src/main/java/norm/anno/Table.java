@@ -17,5 +17,7 @@ public @interface Table {
      * 该类在数据库中数据表的表名
      * @return 表名
      */
-    String value();
+    String value() default "";
+
+    String schema() default "";
 }

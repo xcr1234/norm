@@ -3,7 +3,9 @@ package norm.impl;
 
 
 
+import javafx.scene.control.Tab;
 import norm.BeanException;
+import norm.Configuration;
 import norm.anno.AfterInstance;
 import norm.anno.Id;
 import norm.anno.JoinColumn;
@@ -12,6 +14,7 @@ import norm.anno.Table;
 import norm.anno.Transient;
 import norm.naming.DefaultTableNameStrategy;
 import norm.naming.TableNameStrategy;
+import norm.util.Args;
 import norm.util.BeanUtils;
 
 import java.lang.reflect.Field;
@@ -27,19 +30,21 @@ public final class Meta {
 
 
     private static Map<Class,Meta> map = Collections.synchronizedMap(new HashMap<Class,Meta>());
-    private TableNameStrategy tableNameStrategy;
+    private Configuration configuration;
 
 
     private List<Method> afterInstanceMethods = new ArrayList<Method>();
 
 
-    public static Meta parse(Class clazz,TableNameStrategy tableNameStrategy){
+    public static Meta parse(Class clazz,Configuration configuration){
+        Args.notNull(clazz,"class");
+        Args.notNull(configuration,"configuration");
         if(clazz == null){
             throw new IllegalArgumentException("can't parse null Class.");
         }
         Meta meta = map.get(clazz);
         if(meta == null){
-            meta = new Meta(clazz,tableNameStrategy);
+            meta = new Meta(clazz,configuration);
             map.put(clazz,meta);
         }
         return meta;
@@ -74,9 +79,6 @@ public final class Meta {
                     ColumnMeta columnMeta = new ColumnMeta(this,field,setter, method,name);
                     if(columnMeta.getAnnotation(Id.class) != null){
                         if(idColumn == null){
-                            if(!BeanUtils.isSerializable(columnMeta.getType())){
-                                throw new BeanException("id field is not Serializable : "+ clazz);
-                            }
                             idColumn = columnMeta;
                         }else if(!idColumn.equals(columnMeta)){
                             throw new BeanException("repeat id field!");
@@ -92,7 +94,7 @@ public final class Meta {
                 Method getter = null;
                 Field field = null;
                 try{
-                    getter = clazz.getDeclaredMethod(BeanUtils.getMethod(name));
+                    getter = clazz.getDeclaredMethod(BeanUtils.getMethod(name,method));
                 }catch (Exception e){}
                 try {
                     field = clazz.getDeclaredField(name);
@@ -134,7 +136,7 @@ public final class Meta {
                 if(BeanUtils.isBaseClass(columnMeta.getType())){    //基本类型不支持@Reference注解
                     throw new BeanException("base type doesn't support @Reference :" + columnMeta);
                 }
-                if(!Meta.parse(columnMeta.getType(),tableNameStrategy).getColumnMetas().containsKey(reference.target())){
+                if(!Meta.parse(columnMeta.getType(),configuration).getColumnMetas().containsKey(reference.target())){
                     throw new BeanException("reference target not found :" + reference.target() + " of "+columnMeta);
                 }
             }
@@ -144,21 +146,36 @@ public final class Meta {
         }
     }
 
-    private Meta(Class clazz,TableNameStrategy tableNameStrategy){
+
+    private Meta(Class clazz,Configuration configuration){
+
         this.clazz = clazz;
-        this.tableNameStrategy = tableNameStrategy;
+        this.configuration = configuration;
         init();
 
     }
 
     public TableNameStrategy getTableNameStrategy() {
-        return tableNameStrategy;
+        return configuration.getTableNameStrategy();
     }
 
     private boolean ref = false;
 
     public boolean hasReference() {
         return ref;
+    }
+
+    public boolean hasConstructor(){
+        try {
+            clazz.getDeclaredConstructor();
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
     private ColumnMeta idColumn;
@@ -178,14 +195,30 @@ public final class Meta {
     }
 
 
-
-    private TableNameStrategy tableNameStrategy(){
-        return tableNameStrategy == null ? DefaultTableNameStrategy.DEFAULT : tableNameStrategy;
-    }
-
     public String getTableName() {
-        Table table = (Table) clazz.getAnnotation(Table.class);
-        return clazz.isAnnotationPresent(Table.class) ? table.value() :tableNameStrategy().format(clazz.getSimpleName());
+        String globalSchema = configuration.getSchema();
+        String schema = null;
+        String columnName = null;
+        if(clazz.isAnnotationPresent(Table.class)){
+            Table table = (Table)clazz.getAnnotation(Table.class);
+            if(!table.schema().isEmpty()){
+                schema = table.schema();
+            }
+            if(!table.value().isEmpty()){
+                columnName = table.value();
+            }else{
+                columnName = configuration.getTableNameStrategy().format(clazz.getSimpleName());
+            }
+        }else{
+            columnName = configuration.getTableNameStrategy().format(clazz.getSimpleName());
+        }
+        if(globalSchema == null && schema == null){
+            return columnName;
+        }else if(schema != null){
+            return schema + "." + columnName;
+        }else{
+            return globalSchema + "." + columnName;
+        }
     }
 
     @Override
