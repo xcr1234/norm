@@ -14,7 +14,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-public final class Configuration {
+public final class Configuration  {
     private boolean formatSql;
     private boolean showSql;
     private DataSource dataSource;
@@ -34,16 +34,7 @@ public final class Configuration {
     public Configuration() {
     }
 
-    public Configuration(Configuration copy){
-        this.formatSql = copy.formatSql;
-        this.showSql = copy.showSql;
-        this.dataSource = copy.dataSource;
-        this.driverClass = copy.driverClass;
-        this.url = copy.url;
-        this.username = copy.username;
-        this.password = copy.password;
-        this.info = copy.info;
-    }
+
 
     public Configuration(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -145,7 +136,10 @@ public final class Configuration {
 
     public Connection getConnection() throws SQLException{
         if(dataSource != null){
-            return dataSource.getConnection(username,password);
+            if(username != null && password != null){
+                return dataSource.getConnection(username,password);
+            }
+            return dataSource.getConnection();
         }
         if(url != null){
             if(info != null){
@@ -200,5 +194,21 @@ public final class Configuration {
     public void setSqlFormatter(SQLFormatter sqlFormatter) {
         Args.notNull(sqlFormatter,"sql formatter");
         this.sqlFormatter = sqlFormatter;
+    }
+
+    @Override
+    public String toString() {
+        return "Configuration{" +
+                "formatSql=" + formatSql +
+                ", showSql=" + showSql +
+                ", dataSource=" + dataSource +
+                ", driverClass='" + driverClass + '\'' +
+                ", schema='" + schema + '\'' +
+                ", url='" + url + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", info=" + info +
+                ", maxRecursion=" + maxRecursion +
+                '}';
     }
 }

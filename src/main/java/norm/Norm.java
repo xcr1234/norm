@@ -4,6 +4,7 @@ package norm;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.NoOp;
+import norm.cache.Cache;
 import norm.cache.CacheManager;
 import norm.impl.DaoInterceptor;
 import norm.impl.Meta;
@@ -17,6 +18,7 @@ import norm.util.BeanUtils;
 
 
 import javax.sql.DataSource;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -32,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Norm框架的核心类
  */
-public final class Norm{
+public final class Norm implements Closeable{
 
 
     private Configuration configuration;
@@ -42,10 +44,6 @@ public final class Norm{
 
     public Norm() {
         this.configuration = new Configuration();
-    }
-
-    public Norm(Norm copy) {
-        this.configuration = new Configuration(copy.configuration);
     }
 
     public Norm(Configuration configuration){
@@ -256,8 +254,6 @@ public final class Norm{
         }
     }
 
-
-
     public Properties getInfo() {
         return configuration.getInfo();
     }
@@ -348,5 +344,17 @@ public final class Norm{
     public Norm setSqlFormatter(SQLFormatter sqlFormatter) {
         configuration.setSqlFormatter(sqlFormatter);
         return this;
+    }
+
+
+    @Override
+    public void close()  {
+        Connection connection = this.connectionThreadLocal.get();
+        if(connection != null){
+            this.connectionThreadLocal.remove();
+            try{
+                connection.close();
+            } catch (SQLException e){}
+        }
     }
 }

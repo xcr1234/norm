@@ -668,6 +668,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
             } catch (SQLException e) {
             }
         }
+        this.norm.close();
     }
 
     private void handleError(Connection connection, SQLException e) {
