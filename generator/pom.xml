@@ -27,6 +27,42 @@
             <artifactId>commons-lang</artifactId>
             <version>2.6</version>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.38</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.10</version>
+        </dependency>
+        <dependency>
+            <groupId>dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.ybt.classpath</groupId>
+            <artifactId>ojdbc</artifactId>
+            <version>1.0</version>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
     <profiles>
         <profile>
@@ -51,7 +87,7 @@
                             <encoding>${encoding}</encoding>
                         </configuration>
                     </plugin>
-                    <plugin>
+                   <!-- <plugin>
                         <artifactId>maven-resources-plugin</artifactId>
                         <configuration>
                             <encoding>${encoding}</encoding>
@@ -122,8 +158,38 @@
                         <configuration>
                             <executable>C:\Program Files (x86)\GNU\GnuPG\gpg2</executable>
                         </configuration>
+                    </plugin>-->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.1.1</version>
+                        <executions>
+                            <execution>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>norm.generator.GeneratorMain</mainClass>
+                                    <arguments>
+                                        <argument>basePackage=com.myapp</argument>
+                                        <argument>outputDir=D:\\out</argument>
+                                        <argument>tableName=test</argument>
+                                        <argument>driverClass=oracle.jdbc.driver.OracleDriver</argument>
+                                        <argument>jdbcUrl=jdbc:oracle:thin:@10.50.82.206:1521:core2</argument>
+                                        <argument>username=ybtopr</argument>
+                                        <argument>password=ybtopr_only</argument>
+                                        <argument>template=stand</argument>
+                                        <argument>table=T_YBT_FILEPATH</argument>
+                                        <argument>idColumn=FILE_ID</argument>
+                                        <argument>converter=norm.generator.impl.DefaultConverter</argument>
+                                        <argument>mode=select</argument>
+                                        <argument>moduleName=file</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
-
                 </plugins>
             </build>
         </profile>

@@ -14,4 +14,10 @@ public interface Entity {
 
     String getBasePackage();
 
+    EntityWriter getWriter();
+
+    void setWriter(EntityWriter entityWriter);
+
+    String getBasePackageDir();
+
 }

@@ -4,7 +4,7 @@ import java.sql.SQLException;
 
 public interface Column {
 
-    Class getJavaType() throws SQLException;
+    String getJavaType() ;
 
     /**
      * @see java.sql.Types
@@ -22,5 +22,6 @@ public interface Column {
 
     String getSetterName();
 
+    Class getJavaTypeClass();
 
 }
