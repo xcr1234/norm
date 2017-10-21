@@ -61,10 +61,6 @@ public class DatabaseEntityBuilder implements EntityBuilder {
 
     private Column createColumn(ResultSet resultSet,Converter converter) throws SQLException{
         String columnName = resultSet.getString("COLUMN_NAME");
-        ResultSetMetaData metaData = resultSet.getMetaData();
-        for(int i=1;i<=metaData.getColumnCount();i++){
-            System.out.println(metaData.getColumnLabel(i));
-        }
         int sqlType = resultSet.getInt("DATA_TYPE");
         String sqlTypeName = resultSet.getString("TYPE_NAME");
         return new DataBaseColumn(columnName,sqlType,sqlTypeName,converter);
@@ -77,15 +73,25 @@ public class DatabaseEntityBuilder implements EntityBuilder {
         if(!primaryKeyResultSet.next()){
             throw new GenerateException("table has no primary key:" + tableName);
         }
+        String idName = primaryKeyResultSet.getString("COLUMN_NAME");
 
-        Column idColumn = createColumn(primaryKeyResultSet,converter);
+        if(primaryKeyResultSet.next()){
+            throw new GenerateException("table has multiple primary keys:" + tableName);
+        }
+
+        Column idColumn = null;
         List<Column> columns = new ArrayList<Column>();
         ResultSet colRet = metaData.getColumns(catalog,schema,tableName,"%");
         while (colRet.next()){
             Column column = createColumn(colRet,converter);
-            if(!column.getColumnName().equals(idColumn.getColumnName())){
+            if(column.getColumnName().equals(idName)){
+                idColumn = column;
+            }else{
                 columns.add(column);
             }
+        }
+        if(idColumn == null){
+            throw new GenerateException("table has no primary key:" + tableName);
         }
         return new DatabaseEntity(tableName,converter,idColumn,columns,basePackage);
     }

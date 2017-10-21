@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,16 +60,20 @@ public class DefaultEntityWriter implements EntityWriter {
         FileTask fileTask = (FileTask) xStream.fromXML(filesXml);
         List<FileTaskItem> fileTaskItemList = fileTask.getFileTaskItemList();
 
+        String encoding = fileTask.getEncoding();
+        if(encoding == null || encoding.isEmpty()){
+            encoding = Charset.defaultCharset().displayName();
+        }
 
 
         for (FileTaskItem fileTaskItem : fileTaskItemList) {
             File file = new File(out, fileTaskItem.getTarget());
-            write(configuration, file, root, fileTaskItem.getSrc());
+            write(configuration, file, root, fileTaskItem.getSrc(),encoding);
         }
 
     }
 
-    protected void write(Configuration configuration, File file, Map<String, Object> root, String templateName) throws IOException, TemplateException {
+    protected void write(Configuration configuration, File file, Map<String, Object> root, String templateName,String encoding) throws IOException, TemplateException {
         File parent = file.getParentFile();
         if (!parent.exists()) {
             if (!parent.mkdirs()) {
@@ -79,7 +84,7 @@ public class DefaultEntityWriter implements EntityWriter {
         FileOutputStream outputStream = null;
         try {
             outputStream = new FileOutputStream(file);
-            daoTemplate.process(root, new OutputStreamWriter(outputStream, "utf-8"));
+            daoTemplate.process(root, new OutputStreamWriter(outputStream, encoding));
             logger.info("generate file:" + file);
         } finally {
             IOUtils.closeQuietly(outputStream);

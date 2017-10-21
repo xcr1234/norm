@@ -36,7 +36,7 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.38</version>
-            <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
@@ -55,13 +55,6 @@
             <version>1.6.1</version>
         </dependency>
 
-
-        <dependency>
-            <groupId>com.ybt.classpath</groupId>
-            <artifactId>ojdbc</artifactId>
-            <version>1.0</version>
-            <optional>true</optional>
-        </dependency>
 
     </dependencies>
     <profiles>
@@ -175,15 +168,15 @@
                                         <argument>basePackage=com.myapp</argument>
                                         <argument>outputDir=D:\\out</argument>
                                         <argument>tableName=test</argument>
-                                        <argument>driverClass=oracle.jdbc.driver.OracleDriver</argument>
-                                        <argument>jdbcUrl=jdbc:oracle:thin:@10.50.82.206:1521:core2</argument>
-                                        <argument>username=ybtopr</argument>
-                                        <argument>password=ybtopr_only</argument>
+                                        <argument>driverClass=com.mysql.jdbc.Driver</argument>
+                                        <argument>jdbcUrl=jdbc:mysql://localhost:3306/test?useSSL=false</argument>
+                                        <argument>username=root</argument>
+                                        <argument>password=root</argument>
                                         <argument>template=stand</argument>
-                                        <argument>table=T_YBT_FILEPATH</argument>
-                                        <argument>idColumn=FILE_ID</argument>
+                                        <argument>table=user</argument>
+                                        <argument>idColumn=id</argument>
                                         <argument>converter=norm.generator.impl.DefaultConverter</argument>
-                                        <argument>mode=select</argument>
+                                        <argument>mode=database</argument>
                                         <argument>moduleName=file</argument>
                                     </arguments>
                                 </configuration>

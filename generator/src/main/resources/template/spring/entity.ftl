@@ -7,6 +7,7 @@ import norm.anno.Column;
 public class ${entity.name}{
 
     @Id
+    @Column("${entity.idColumn.columnName}")
     private ${entity.idColumn.javaType} ${entity.idColumn.javaName};
 
     public ${entity.idColumn.javaType} ${entity.idColumn.getterName}(){
