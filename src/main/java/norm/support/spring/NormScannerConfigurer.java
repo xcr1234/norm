@@ -2,6 +2,8 @@ package norm.support.spring;
 
 import norm.Norm;
 import norm.Norms;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;

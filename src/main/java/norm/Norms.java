@@ -189,6 +189,14 @@ public final class Norms  {
         return norm.getSqlFormatter();
     }
 
+    public static String getDatabase() {
+        return norm.getDatabase();
+    }
+
+    public static void setDatabase(String database) {
+        norm.setDatabase(database);
+    }
+
     public static Norm setSqlFormatter(SQLFormatter sqlFormatter) {
         return norm.setSqlFormatter(sqlFormatter);
     }

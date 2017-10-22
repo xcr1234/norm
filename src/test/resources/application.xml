@@ -33,10 +33,15 @@
         <property name="password" value="${jdbc.password}"></property>
     </bean>
 
+    <bean id="norm" class="norm.Norm">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="showSql" value="true"/>
+    </bean>
 
     <!--在配置了bean id为dataSource后，NormScannerConfigurer会自动检测到并以该dataSource为数据源，也可以修改dataSourceBeanName属性-->
     <bean class="norm.support.spring.NormScannerConfigurer">
         <property name="basePackage" value="norm.test.dao"></property>
+        <property name="normBeanName" value="norm"></property>
     </bean>
 
 

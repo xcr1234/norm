@@ -6,15 +6,14 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.NoOp;
 import norm.cache.Cache;
 import norm.cache.CacheManager;
-import norm.impl.DaoInterceptor;
-import norm.impl.Meta;
-import norm.impl.MethodFilter;
-import norm.impl.ObjectServiceInterceptor;
-import norm.impl.ServiceInterceptor;
+import norm.impl.*;
 import norm.naming.TableNameStrategy;
+import norm.page.PageSql;
+import norm.page.impl.*;
 import norm.util.Args;
 import norm.util.BasicFormatterImpl;
 import norm.util.BeanUtils;
+import org.apache.ibatis.plugin.PluginException;
 
 
 import javax.sql.DataSource;
@@ -27,6 +26,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -124,6 +125,13 @@ public final class Norm implements Closeable{
         enhancer.setCallbacks(new Callback[]{new DaoInterceptor(tClass,daoClass,this), NoOp.INSTANCE});
         enhancer.setCallbackFilter(MethodFilter.getInstance());
         return (Dao) enhancer.create();
+    }
+
+    public CrudDao<Object, Object> createDaoForType(Class daoType){
+        Type [] types = daoType.getGenericInterfaces();
+        ParameterizedType parameterizedType = (ParameterizedType) types[0];
+        Class type = (Class) parameterizedType.getActualTypeArguments()[0];
+        return CrudDaoImpl.create(type,this);
     }
 
 
@@ -346,6 +354,38 @@ public final class Norm implements Closeable{
         return this;
     }
 
+    public String getDatabase() {
+        return configuration.getDatabase();
+    }
+
+    public void setDatabase(String database) {
+        configuration.setDatabase(database);
+    }
+
+    public PageSql getPageSql(){
+        if(configuration.getDatabase() == null){
+            throw new QueryException("the database not config.");
+        }
+        PageSql pageSql = pageSqlMap.get(configuration.getDatabase().toLowerCase());
+        if(pageSql == null){
+            throw new QueryException("unsupported pageable data base:" + configuration.getDatabase());
+        }
+        return pageSql;
+    }
+
+    private static Map<String,PageSql> pageSqlMap = new HashMap<String,PageSql>();
+    public static void registerPageSql(PageSql pageSql){
+        if(pageSql == null){
+            throw new IllegalArgumentException();
+        }
+        String db = pageSql.database();
+        if(db == null){
+            throw new PluginException("the database of pagesql is null!");
+        }
+        pageSqlMap.put(db.toLowerCase(),pageSql);
+    }
+
+
 
     @Override
     public void close()  {
@@ -356,5 +396,15 @@ public final class Norm implements Closeable{
                 connection.close();
             } catch (SQLException e){}
         }
+    }
+
+    static {
+        registerPageSql(new Db2Page());
+        registerPageSql(new DerbyPage());
+        registerPageSql(new H2Page());
+        registerPageSql(new MySQLPage());
+        registerPageSql(new OraclePage());
+        registerPageSql(new PostgreSQLPage());
+        registerPageSql(new SQLServerPage());
     }
 }

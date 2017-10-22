@@ -7,7 +7,6 @@ import norm.Norm;
 import norm.NormAware;
 import norm.Norms;
 import norm.page.Page;
-import norm.page.Pages;
 import norm.test.dao.UserDao;
 import norm.test.entity.User;
 
@@ -31,7 +30,8 @@ public class Test {
         Norms.setUsername("root");
         Norms.setPassword("root");
         Norms.setShowSql(true);
-        Norms.setFormatSql(true);
+        Norms.setFormatSql(false);
+        Norms.setDatabase("mysql");
 
         //③通过norm对象的链式语法
         //Norm norm = Norms.getNorm();
@@ -46,26 +46,13 @@ public class Test {
         System.out.println(userList);
 
 
-        //find all 分页查询，MySQL，查询第2页的内容，每页3条。
-        Page page = Pages.create(Databases.MySQL,2,3);
+        //find all 分页查询，MySQL，查询第4页的内容，每页5条。
+        Page page = new Page(1,2);
 
         List<User> userListPaged = userDao.findAll(page);
 
         System.out.println(userListPaged);
 
-        //获取某一条的roleList。注意，由于roleList是join column类型，所以调用其get方法的时候才会加载（懒加载）
-        User user = userDao.findOne(8);
-        System.out.println(user.getRoleList());
-
-
-        //关于Norm、Norms、Page、Pages四个对象
-        //这四个对象是Norm框架的核心对象。所有的dao、service、jdbc操作都在Norm对象上进行。分页查询都在Page对象上进行。
-        //Norms是一个全局的Norm。相当于 public final static Norm norms = new Norm();
-        //Pages是Page的工厂类，所有的Page对象都应该从Pages工厂中获取。
-        //因为不同的数据库分页查询sql语句不同，故需要区分Databases：
-        //例如：查询第2页的内容，每页10条。
-        // Page page = Pages.create(Databases.MySQL,2,10);
-        // Page page = Pages.create(Databases.Oracle,2,10);
 
         //如果系统中没有多个数据库的需求，直接用Norms对象即可。
         //如果系统中连接了多个数据库，那么每个数据库都需要new Norm()，然后设置不同的Configuration。

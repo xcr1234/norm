@@ -30,6 +30,7 @@ public final class Configuration  {
     private int maxRecursion = 3;
     private CacheManager cacheManager;
     private SQLFormatter sqlFormatter;
+    private String database;
 
     public Configuration() {
     }
@@ -194,6 +195,15 @@ public final class Configuration  {
     public void setSqlFormatter(SQLFormatter sqlFormatter) {
         Args.notNull(sqlFormatter,"sql formatter");
         this.sqlFormatter = sqlFormatter;
+    }
+
+    public String getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(String database) {
+        Args.notNull(database,"the database");
+        this.database = database.toLowerCase();
     }
 
     @Override

@@ -37,11 +37,14 @@ import java.lang.annotation.Target;
  *
  * 注意target="id"、mappedBy = "user"，这些都指向的是类属性名，而不是表字段名。
  *
+ *
+ * @deprecated 有bug，慎用，推荐整合mybatis自行查询
  * </pre>
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD,ElementType.METHOD})
+@Deprecated
 public @interface Reference {
 
     /**

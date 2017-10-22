@@ -2,8 +2,11 @@ package norm.test;
 
 
 
+import norm.test.entity.User;
 import norm.test.service.TestService;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import java.util.List;
 
 
 public class SpringTest {
@@ -12,8 +15,8 @@ public class SpringTest {
 
         TestService testService = (TestService) context.getBean("testService");
 
-        System.out.println(testService.findAll());
-
-
+        List<User> userList = testService.findAll();
+        System.out.println(userList);
+        System.out.println(userList.get(0).getRoleList());
     }
 }

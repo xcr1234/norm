@@ -1,8 +1,10 @@
 package norm.impl;
 
 
+import javafx.scene.layout.ColumnConstraints;
 import norm.anno.Column;
 import norm.anno.Id;
+import norm.anno.JoinColumn;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,20 +82,57 @@ public final class SQLBuilder {
     }
 
     public static String findById(Meta meta){
-        return "select * from " + meta.getTableName() + " where "+meta.getIdColumn().getName() + " = ?";
+        return query(meta).append(" where ").append(meta.getIdColumn().getName()).append(" = ?").toString();
     }
 
     public static String findAll(Meta meta){
-        return "select * from " + meta.getTableName();
+        return query(meta).toString();
     }
 
     public static String findByColumn(Meta meta,ColumnMeta columnMeta){
-        return "select * from " + meta.getTableName() + " where " + columnMeta.getName() + " = ?";
+        return query(meta).append(" where ").append(columnMeta.getName()).append(" = ?").toString();
     }
 
     public static String deleteAll(Meta meta){
         return "delete from " + meta.getTableName();
     }
 
+    private static StringBuilder query(Meta meta){
+        StringBuilder sb = new StringBuilder();
+        sb.append("select ");
+        boolean first = true;
+        for(ColumnMeta columnMeta : meta.getColumnMetas().values()){
+            if(columnMeta.select() && columnMeta.getAnnotation(JoinColumn.class) == null){
+                if(!first){
+                    sb.append(',');
+                }
+                sb.append(columnMeta.getName()).append(' ');
+                first = false;
+            }
+        }
+        sb.append(" from ").append(meta.getTableName());
+        return sb;
+    }
 
+    public static String findAllFilter(Meta meta,Object object){
+        StringBuilder sb = query(meta);
+        StringBuilder whereSb = new StringBuilder();
+        boolean first = true;
+        for(ColumnMeta column : meta.getColumnMetas().values()){
+            if(column.getAble() && column.getAnnotation(JoinColumn.class) == null){
+                Object value = column.get(object);
+                if(value != null){
+                    if(!first){
+                        whereSb.append(" and ");
+                    }
+                    whereSb.append(column.getName()).append(" = ? ");
+                    first = false;
+                }
+            }
+        }
+        if(whereSb.length() > 0){
+            sb.append(" where ").append(whereSb);
+        }
+        return sb.toString();
+    }
 }

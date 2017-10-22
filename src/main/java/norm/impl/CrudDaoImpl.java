@@ -38,7 +38,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
     private Meta meta;
     private Norm norm;
 
-    public CrudDaoImpl(Class<?> type, Norm norm) {
+    private CrudDaoImpl(Class<?> type, Norm norm) {
         this.norm = norm;
         this.meta = Meta.parse(type, norm.getConfiguration());
     }
@@ -309,11 +309,9 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
         return findByColumn(id,meta,meta.getIdColumn(),1);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public List<Object> findAll() {
-        String sql = SQLBuilder.findAll(meta);
-        return listBySql(sql,null,null);
+        return findAll((Page)null);
     }
 
     @Override
@@ -321,6 +319,26 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
     public List<Object> findAll(Page page) {
         String sql = SQLBuilder.findAll(meta);
         return listBySql(sql,page,null);
+    }
+
+    @Override
+    public List<Object> findAll(Object o) {
+        return findAll(o,null);
+    }
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<Object> findAll(Object o, Page page) {
+        String sql = SQLBuilder.findAllFilter(meta,o);
+        ArrayList<Object> list = new ArrayList<Object>();
+        for(ColumnMeta column : meta.getColumnMetas().values()){
+            if(column.getAble()){
+                Object value = column.get(o);
+                if(value != null){
+                    list.add(value);
+                }
+            }
+        }
+        return listBySql(sql,page,list.toArray());
     }
 
 
@@ -458,7 +476,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
 
     QueryResult queryResult(String sql, Page pageable, Object [] values){
         if(pageable != null){
-            sql = pageable.pageSelect(sql);
+            sql = norm.getPageSql().buildSql(pageable,sql);
         }
         if(norm.isFormat_sql()){
             sql = norm.getSqlFormatter().format(sql);
@@ -478,9 +496,6 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
                 for(Object value:values){
                     setObject(ps,i++,value);
                 }
-            }
-            if(pageable != null){
-                pageable.setState(ps,i);
             }
             rs = ps.executeQuery();
             return new QueryResultImpl(rs,norm.getConfiguration());
@@ -494,7 +509,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
 
     List listBySql(String sql,Page pageable,Object [] values) {
         if(pageable != null){
-            sql = pageable.pageSelect(sql);
+            sql = norm.getPageSql().buildSql(pageable,sql);
         }
         if(norm.isFormat_sql()){
             sql = norm.getSqlFormatter().format(sql);
@@ -514,9 +529,6 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
                 for(Object value:values){
                     setObject(ps,i++,value);
                 }
-            }
-            if(pageable != null){
-                pageable.setState(ps,i);
             }
             rs = ps.executeQuery();
             Set<String> set = new HashSet<String>();
@@ -542,14 +554,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
 
 
 
-    private Object createObject(Meta meta){
-        if(meta.hasReference()){
-            Enhancer enhancer = new Enhancer();
-            enhancer.setSuperclass(meta.getClazz());
-            enhancer.setCallbackFilter(MethodFilter.getInstance());
-            enhancer.setCallbacks(new Callback[]{new BeanInterceptor(meta,norm), NoOp.INSTANCE});
-            return enhancer.create();
-        }
+    public Object createObject(Meta meta){
         Class type = meta.getClazz();
         try {
             return type.newInstance();

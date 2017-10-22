@@ -10,10 +10,14 @@ import java.lang.annotation.Target;
  * 加上了该注解的，表示是从另一个实体中引用的List，不会包含在insert/update语句中.
  *
  * 详细的参考说明参阅：{@link Reference}
+ *
+ *
+ * @deprecated 有bug，慎用，推荐整合mybatis自行查询
  * </pre>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD,ElementType.METHOD})
+@Deprecated
 public @interface JoinColumn {
 
     Class target();

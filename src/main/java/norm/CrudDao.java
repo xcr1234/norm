@@ -76,9 +76,19 @@ public interface CrudDao <T,ID>{
 
     /**
      * 返回所有的实体List，支持分页查询，返回值其实是一个{@link java.util.ArrayList}
-     * @param page 分页查询，建议使用{@link norm.page.Pages#create(Databases, int, int)}实现类。
+     * @param page 分页查询，
      * @return 所有的实体List（已分页）
      */
     List<T> findAll(Page page);
+
+    /**
+     * 返回所有的实体List，支持分页查询，参数做为查询条件，返回值其实是一个{@link java.util.ArrayList}
+     */
+    List<T> findAll(T t);
+
+    /**
+     * 返回所有的实体List，支持分页查询，参数做为查询条件，返回值其实是一个{@link java.util.ArrayList}
+     */
+    List<T> findAll(T t,Page page);
 
 }
