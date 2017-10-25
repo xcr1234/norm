@@ -1,8 +1,5 @@
 package norm.impl;
 
-import net.sf.cglib.proxy.Callback;
-import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.NoOp;
 
 import norm.CrudDao;
 import norm.Norm;
@@ -10,22 +7,24 @@ import norm.NormAware;
 import norm.QueryException;
 
 import norm.anno.Id;
-import norm.anno.Reference;
+
+import norm.anno.NoConstructor;
 import norm.page.Page;
 import norm.result.QueryResult;
 import norm.util.ResultSetHandler;
+import sun.reflect.ReflectionFactory;
 
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.security.AccessController;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.sql.Date;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -57,6 +56,10 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
     @Override
     public Norm __getNormObject() {
         return norm;
+    }
+
+    public Meta getMeta() {
+        return meta;
     }
 
     private static class Entry{
@@ -99,7 +102,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
         PreparedStatement ps = null;
         if (needIdentity(object)) {
             try {
-                ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                ps = norm.isCollectGenerateId() ? connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(sql);
                 int index = 1;
                 for (ColumnMeta columnMeta : meta.getColumnMetas().values()) {
                     if (columnMeta.insert()) {
@@ -110,16 +113,17 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
                 if (row <= 0) {
                     return null;
                 }
-                ResultSet gkRs = ps.getGeneratedKeys();
-                if (gkRs.next()) {
-                    Object gkId = ResultSetHandler.get(gkRs, 1, meta.getIdColumn().getType(), meta.getIdColumn().toString());
-                    meta.getIdColumn().set(object, gkId);
-                    return object;
-                } else {
-                    return object;
+                if(norm.isCollectGenerateId()){
+                    ResultSet gkRs = ps.getGeneratedKeys();
+                    if (gkRs.next()) {
+                        Object gkId = ResultSetHandler.get(gkRs, 1, meta.getIdColumn().getType(), meta.getIdColumn().toString());
+                        meta.getIdColumn().set(object, gkId);
+                        return object;
+                    }
                 }
+                return object;
             } catch (SQLException e) {
-                 handleError(connection,e);
+                 handleError(connection,e,sql,object);
                  return null;
             } finally {
                 closeObjects(connection, ps, null);
@@ -139,7 +143,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
                 }
                 return null;
             }catch (SQLException e){
-                handleError(connection,e);
+                handleError(connection,e,sql,object);
                 return null;
             }finally {
                 closeObjects(connection, ps, null);
@@ -166,7 +170,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
             setObject(ps,1,meta.getIdColumn().get(object));
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            handleError(connection,e);
+            handleError(connection,e,sql,object);
             return false;
         }finally {
             closeObjects(connection,ps,null);
@@ -192,7 +196,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
             setObject(ps,1,id);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            handleError(connection,e);
+            handleError(connection,e,sql,id);
             return false;
         }finally {
             closeObjects(connection,ps,null);
@@ -214,7 +218,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
             ps = connection.prepareStatement(sql);
             return ps.executeUpdate();
         } catch (SQLException e) {
-            handleError(connection,e);
+            handleError(connection,e,sql);
             return 0;
         }finally {
             closeObjects(connection,ps,null);
@@ -246,7 +250,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
             }
             ps.executeUpdate();
         }catch (SQLException e){
-            handleError(connection,e);
+            handleError(connection,e,sql,object);
         }finally {
             closeObjects(connection,ps,null);
         }
@@ -269,7 +273,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
             rs = ps.executeQuery();
             return rs.next();
         } catch (SQLException e) {
-            handleError(connection,e);
+            handleError(connection,e,sql,o);
             return false;
         }finally {
             closeObjects(connection,ps,rs);
@@ -297,7 +301,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
                 return 0;
             }
         } catch (SQLException e) {
-            handleError(connection,e);
+            handleError(connection,e,sql);
             return 0;
         }finally {
             closeObjects(connection,ps,rs);
@@ -341,23 +345,22 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
         return listBySql(sql,page,list.toArray());
     }
 
-
+    @SuppressWarnings("deprecation")
     Object fromResultSet(Set<String> set,ResultSet rs,Meta meta,int recursion) throws SQLException {
 
         Object object = createObject(meta);
         for(ColumnMeta cm : meta.getColumnMetas().values()){
             if(set.contains(cm.getName())){
-                Reference reference = cm.getAnnotation(Reference.class);
-                if(reference != null){
-                    if(recursion > norm.getConfiguration().getMaxRecursion()){
-                        cm.set(object,null);
-                    }else{
-                        Meta targetMeta = Meta.parse(cm.getType(),norm.getConfiguration());
-                        ColumnMeta targetColumn = targetMeta.getColumnMetas().get(reference.target());
-                        Object referenceValue = ResultSetHandler.get(rs,cm.getName(),targetColumn.getType(),cm.toString());
-                        Object value = findByColumn(referenceValue,targetMeta,targetColumn,recursion+1);
-                        cm.set(object,value);
-                    }
+                if(cm.isReference()){
+//                    if(recursion > norm.getConfiguration().getMaxRecursion()){
+//                        cm.set(object,null);
+//                    }else{
+//                        Meta targetMeta = Meta.parse(cm.getType(),norm.getConfiguration());
+//                        ColumnMeta targetColumn = targetMeta.getColumnMetas().get(reference.target());
+//                        Object referenceValue = ResultSetHandler.get(rs,cm.getName(),targetColumn.getType(),cm.toString());
+//                        Object value = findByColumn(referenceValue,targetMeta,targetColumn,recursion+1);
+//                        cm.set(object,value);
+//                    }
                 }else{
                     Object value = ResultSetHandler.get(rs,cm.getName(),cm.getType(),cm.toString());
                     cm.set(object,value);
@@ -406,7 +409,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
 
             return null;
         } catch (SQLException e) {
-            handleError(connection,e);
+            handleError(connection,e,sql,params);
             return null;
         }finally {
             closeObjects(connection,ps,rs);
@@ -429,7 +432,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
             }
             return ps.executeUpdate();
         } catch (SQLException e) {
-            handleError(connection,e);
+            handleError(connection,e,sql,params);
             return 0;
         }finally {
             closeObjects(connection,ps,null);
@@ -466,7 +469,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
 
             return null;
         } catch (SQLException e) {
-            handleError(connection,e);
+            handleError(connection,e,sql,params);
             return null;
         }finally {
             closeObjects(connection,ps,rs);
@@ -500,14 +503,15 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
             rs = ps.executeQuery();
             return new QueryResultImpl(rs,norm.getConfiguration());
         } catch (SQLException e) {
-            handleError(connection,e);
+            handleError(connection,e,sql,values);
             return null;
         }finally {
             closeObjects(connection,ps,rs);
         }
     }
 
-    List listBySql(String sql,Page pageable,Object [] values) {
+    List listBySql(String originSql,Page pageable,Object [] values) {
+        String sql = originSql;
         if(pageable != null){
             sql = norm.getPageSql().buildSql(pageable,sql);
         }
@@ -540,9 +544,59 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
             while (rs.next()){
                 list.add(fromResultSet(set,rs,meta,1));
             }
+
+
+            if(pageable != null){
+                if(pageable.isEvalCount()){
+                    i = 1;
+                    String countSql = "select count(1) from ( " + originSql + " )";
+                    PreparedStatement countPs = null;
+                    ResultSet countRs = null;
+                    if(norm.isShow_sql()){
+                        norm.showSQL(countSql);
+                    }
+                    try{
+                        countPs = connection.prepareStatement(countSql);
+                        if(values != null){
+                            for(Object value:values){
+                                setObject(countPs,i++,value);
+                            }
+                        }
+                        countRs = countPs.executeQuery();
+                        int totalCount = 0;
+                        if(countRs.next()){
+                            totalCount = countRs.getInt(1);
+                        }
+                        pageable.setTotal(totalCount);
+                        int pageSize = pageable.getPageSize();
+                        pageable.setPageCount(totalCount / pageSize + ((totalCount % pageSize == 0) ? 0 : 1));
+                    }catch (SQLException e){
+                        handleError(connection,e,countSql,values);
+                        return null;
+                    }finally {
+                        if(countRs != null){
+                            try {
+                                countRs.close();
+                            } catch (SQLException e) {
+
+                            }
+                        }
+                        if(countPs != null){
+                            try {
+                                countPs.close();
+                            } catch (SQLException e) {
+
+                            }
+                        }
+                    }
+                }
+                if(pageable.isCollectResult()){
+                    pageable.setResult(list);
+                }
+            }
             return list;
         } catch (SQLException e) {
-            handleError(connection,e);
+            handleError(connection,e,sql,values);
             return null;
         }finally {
             closeObjects(connection,ps,rs);
@@ -551,11 +605,32 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
 
 
 
+    private static final Constructor<Object> OBJECT_CONSTRUCTOR;
 
+    static {
+        try {
+            OBJECT_CONSTRUCTOR = Object.class.getDeclaredConstructor();
+        } catch (NoSuchMethodException e) {
+            throw new Error("object constructor not found.",e);
+        }
+    }
 
 
     public Object createObject(Meta meta){
         Class type = meta.getClazz();
+        if(type.isAnnotationPresent(NoConstructor.class)){
+            ReflectionFactory reflectionFactory = (ReflectionFactory) AccessController.doPrivileged(new ReflectionFactory.GetReflectionFactoryAction());
+            Constructor constructor = reflectionFactory.newConstructorForSerialization(type,OBJECT_CONSTRUCTOR);
+            try {
+                return constructor.newInstance();
+            } catch (InstantiationException e) {
+                throw new QueryException("can't instance object of " +type + " by @NoConstructor",e);
+            } catch (IllegalAccessException e) {
+                throw new QueryException("can't instance object of " +type + " by @NoConstructor",e);
+            } catch (InvocationTargetException e) {
+                throw new QueryException("can't instance object of " +type + " by @NoConstructor",e);
+            }
+        }
         try {
             return type.newInstance();
         } catch (InstantiationException e) {
@@ -596,7 +671,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
 
             return null;
         } catch (SQLException e) {
-            handleError(connection,e);
+            handleError(connection,e,sql,columnValue);
             return null;
         }finally {
             closeObjects(connection,ps,rs);
@@ -676,7 +751,15 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
         this.norm.close();
     }
 
-    private void handleError(Connection connection, SQLException e) {
+    private void handleError(Connection connection, SQLException e,String sql){
+        handleError(connection,e,sql,new Object[]{});
+    }
+
+    private void handleError(Connection connection, SQLException e,String sql,Object  arg){
+        handleError(connection,e,sql,new Object[]{arg});
+    }
+
+    private void handleError(Connection connection, SQLException e,String sql,Object [] args) {
         if (norm.getTransactional().hasBegin()) {
             try {
                 connection.rollback();
@@ -688,8 +771,39 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
                 }
             }
         }
-        throw new QueryException(e);
+        QueryException ex = new QueryException("an error occurred while execute jdbc query.\n" +
+                "Class:[" + meta.getClazz() + "]\n" +
+                "SQL:[" + sql + "]\n" +
+                "Parameters:" + showParameters(args),e);
+        ex.setType(meta.getClazz());
+        ex.setSql(sql);
+        ex.setParameters(args);
+        ex.setConnection(connection);
+        ex.setNorm(norm);
+        throw ex;
     }
 
+    private String showParameters(Object[] args){
+        if(args == null){
+            return "[]";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        boolean first = true;
+        for(Object arg : args){
+            if(arg == null){
+                sb.append("(null)");
+            }else{
+                String clz = arg.getClass().getName();
+                if(clz.startsWith("java.lang.")){
+                    clz =  arg.getClass().getSimpleName();
+                }
+                sb.append(arg).append('(').append(clz).append(')');
+            }
+            if(!first)sb.append(" , ");
+            first = false;
+        }
+        return sb.append(']').toString();
+    }
 
 }

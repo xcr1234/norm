@@ -4,10 +4,9 @@ package norm;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.NoOp;
-import norm.cache.Cache;
 import norm.cache.CacheManager;
 import norm.impl.*;
-import norm.naming.TableNameStrategy;
+import norm.naming.NameStrategy;
 import norm.page.PageSql;
 import norm.page.impl.*;
 import norm.util.Args;
@@ -18,15 +17,12 @@ import org.apache.ibatis.plugin.PluginException;
 
 import javax.sql.DataSource;
 import java.io.Closeable;
-import java.io.IOException;
-import java.io.Serializable;
 
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -66,8 +62,11 @@ public final class Norm implements Closeable{
                 connection = configuration.getConnection();
                 connectionThreadLocal.set(connection);
             } catch (SQLException e) {
-                throw new QueryException(e);
+                throw new QueryException("can't get connection for norm.",e);
             }
+        }
+        if(connection != null){
+            configuration.driverRegistered = true;
         }
         return connection;
     }
@@ -90,6 +89,22 @@ public final class Norm implements Closeable{
     public Transactional getTransactional() {
         assert transactional != null;
         return transactional;
+    }
+
+    public boolean isCollectGenerateId() {
+        return configuration.isCollectGenerateId();
+    }
+
+    public void setCollectGenerateId(boolean collectGenerateId) {
+        configuration.setCollectGenerateId(collectGenerateId);
+    }
+
+    public NameStrategy getColumnNameStrategy() {
+        return configuration.getColumnNameStrategy();
+    }
+
+    public void setColumnNameStrategy(NameStrategy columnNameStrategy) {
+        configuration.setColumnNameStrategy(columnNameStrategy);
     }
 
     public void closeConnection(){
@@ -127,7 +142,7 @@ public final class Norm implements Closeable{
         return (Dao) enhancer.create();
     }
 
-    public CrudDao<Object, Object> createDaoForType(Class daoType){
+    public CrudDaoImpl createDaoForType(Class daoType){
         Type [] types = daoType.getGenericInterfaces();
         ParameterizedType parameterizedType = (ParameterizedType) types[0];
         Class type = (Class) parameterizedType.getActualTypeArguments()[0];
@@ -205,11 +220,11 @@ public final class Norm implements Closeable{
         return (Service) value;
     }
 
-    public TableNameStrategy getTableNameStrategy() {
+    public NameStrategy getTableNameStrategy() {
         return configuration.getTableNameStrategy();
     }
 
-    public Norm setTableNameStrategy(TableNameStrategy tableNameStrategy) {
+    public Norm setTableNameStrategy(NameStrategy tableNameStrategy) {
         configuration.setTableNameStrategy(tableNameStrategy);
         return this;
     }
@@ -364,7 +379,7 @@ public final class Norm implements Closeable{
 
     public PageSql getPageSql(){
         if(configuration.getDatabase() == null){
-            throw new QueryException("the database not config.");
+            throw new QueryException("the database in norm not config.");
         }
         PageSql pageSql = pageSqlMap.get(configuration.getDatabase().toLowerCase());
         if(pageSql == null){

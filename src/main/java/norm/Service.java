@@ -4,11 +4,14 @@ import norm.page.Page;
 
 import java.util.List;
 
-public abstract class Service<T,ID> {
+public abstract class Service<T,ID> implements BaseService<T,ID> {
 
 
-    private CrudDao<T,ID> dao;
+    protected CrudDao<T,ID> dao;
 
+    protected Service(CrudDao<T,ID> dao){
+        this.dao = dao;
+    }
 
     public Service(Class<? extends CrudDao<T, ID>> daoClass){
         this(daoClass,null);
@@ -59,5 +62,15 @@ public abstract class Service<T,ID> {
 
     public List<T> findAll(Page page) {
         return dao.findAll(page);
+    }
+
+    @Override
+    public List<T> findAll(T t) {
+        return dao.findAll(t);
+    }
+
+    @Override
+    public List<T> findAll(T t, Page page) {
+        return dao.findAll(t, page);
     }
 }

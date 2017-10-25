@@ -5,7 +5,7 @@ import norm.support.mybatis.page.PageHelper;
 
 import java.io.Serializable;
 
-public final class Page implements Serializable{
+public class Page implements Serializable{
 
 
     private static final long serialVersionUID = -6798071663464647031L;
@@ -24,11 +24,24 @@ public final class Page implements Serializable{
     private Integer pageCount;
     private transient Object result;
 
+    public Page(){
+        this(1);
+    }
+
     public Page(int pageNumber) {
         this(pageNumber, PageHelper.getDefaultPageSize());
     }
 
     public Page(int pageNumber, int pageSize) {
+        if(pageNumber <= 0){
+            throw new IllegalArgumentException("illegal page number : " + pageNumber);
+        }
+        if(pageSize <= 0){
+            throw new IllegalArgumentException("illegal page size:" + pageSize);
+        }
+        if(PageHelper.getMaxPageSize() != null && pageSize > PageHelper.getMaxPageSize()){
+            throw new IllegalArgumentException("page size too much:" + pageSize);
+        }
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
         this.evalCount = PageHelper.isDefaultEvalCount();
@@ -75,6 +88,9 @@ public final class Page implements Serializable{
     }
 
     public void setPageNumber(int pageNumber) {
+        if(pageNumber <= 0){
+            throw new IllegalArgumentException("illegal page number:" + pageNumber);
+        }
         this.pageNumber = pageNumber;
     }
 
@@ -83,6 +99,12 @@ public final class Page implements Serializable{
     }
 
     public void setPageSize(int pageSize) {
+        if(pageSize <= 0){
+            throw new IllegalArgumentException("illegal page size:" + pageSize);
+        }
+        if(PageHelper.getMaxPageSize() != null && pageSize > PageHelper.getMaxPageSize()){
+            throw new IllegalArgumentException("page size too much:" + pageSize);
+        }
         this.pageSize = pageSize;
     }
 

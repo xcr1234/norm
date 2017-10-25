@@ -1,61 +1,46 @@
 package norm.impl;
 
-
-import javafx.scene.layout.ColumnConstraints;
 import norm.anno.Column;
 import norm.anno.Id;
-import norm.anno.JoinColumn;
+import norm.jdbc.SQL;
 
-import java.util.ArrayList;
-import java.util.List;
+
 
 /**
  * 构造动态sql的类
  */
 public final class SQLBuilder {
-    public static String insert(Meta meta){
-        StringBuilder sb = new StringBuilder(32);
-        sb.append("insert into ").append(meta.getTableName()).append(" (");
-        int count = 0;
-        List<ColumnMeta> columnMetaList = new ArrayList<ColumnMeta>();
-        for(ColumnMeta columnMeta : meta.getColumnMetas().values()){
-            if(columnMeta.insert()){
-                String name = null;
-                Column column = columnMeta.getAnnotation(Column.class);
-                columnMetaList.add(columnMeta);
-                if(column != null && !column.value().isEmpty()){
-                    name = column.value();
-                }else{
-                    name = columnMeta.getName();
+    public static String insert(final Meta meta){
+
+        return new SQL(){{
+            INSERT_INTO(meta.getTableName());
+            for(ColumnMeta columnMeta : meta.getColumnMetas().values()){
+                if(columnMeta.insert()){
+                    String name = null;
+                    Column column = columnMeta.getAnnotation(Column.class);
+                    if(column != null && !column.value().isEmpty()){
+                        name = column.value();
+                    }else{
+                        name = columnMeta.getName();
+                    }
+                    Id id = columnMeta.getAnnotation(Id.class);
+                    if(id != null && !id.value().isEmpty()){
+                        VALUES(name,id.value());
+                    }else{
+                        VALUES(name,"?");
+                    }
+
                 }
-                if(count > 0){
-                    sb.append(',');
-                }
-                sb.append(name);
-                count++;
             }
-        }
-        sb.append(" ) values ( ");
-        for(int i=0;i<count;i++){
-            if(i>0){
-                sb.append(',');
-            }
-            Id id = columnMetaList.get(i).getAnnotation(Id.class);
-            if(id != null && !id.value().isEmpty()){
-                sb.append(id.value());
-            }else{
-                sb.append('?');
-            }
-        }
-        sb.append(" )");
-        return sb.toString();
+        }}.toString();
+
     }
 
-    public static String delete(Meta meta){
-        return "delete from " + meta.getTableName() +
-                " where " +
-                meta.getIdColumn().getName() +
-                " = ?";
+    public static String delete(final Meta meta){
+        return new SQL(){{
+            DELETE_FROM(meta.getTableName());
+            WHERE(meta.getIdColumn().getName() + " = ?");
+        }}.toString();
     }
 
     public static String count(Meta meta){
@@ -66,23 +51,19 @@ public final class SQLBuilder {
         return "select 1 from " + meta.getTableName() + " where " + meta.getIdColumn().getName() + " = ?";
     }
 
-    public static String update(Meta meta){
-        StringBuilder sb = new StringBuilder(32);
-        sb.append("update ").append(meta.getTableName());
-        sb.append(" set ");
-        int count = 0;
-        for(ColumnMeta columnMeta:meta.getColumnMetas().values()){
-            if(columnMeta.update()){
-                if(count > 0) sb.append(',');
-                sb.append(columnMeta.getName()).append(" = ? ");
-                count++;
+    public static String update(final Meta meta){
+        return new SQL(){{
+            UPDATE(meta.getTableName());
+            for(ColumnMeta columnMeta:meta.getColumnMetas().values()){
+                if(columnMeta.update()){
+                    SET(columnMeta.getName() + " = ?");
+                }
             }
-        }
-        return sb.toString();
+        }}.toString();
     }
 
     public static String findById(Meta meta){
-        return query(meta).append(" where ").append(meta.getIdColumn().getName()).append(" = ?").toString();
+        return query(meta).WHERE(meta.getIdColumn().getName() + " = ?").toString();
     }
 
     public static String findAll(Meta meta){
@@ -90,49 +71,38 @@ public final class SQLBuilder {
     }
 
     public static String findByColumn(Meta meta,ColumnMeta columnMeta){
-        return query(meta).append(" where ").append(columnMeta.getName()).append(" = ?").toString();
+        return query(meta).WHERE(columnMeta.getName() + " = ?").toString();
     }
 
     public static String deleteAll(Meta meta){
         return "delete from " + meta.getTableName();
     }
 
-    private static StringBuilder query(Meta meta){
-        StringBuilder sb = new StringBuilder();
-        sb.append("select ");
-        boolean first = true;
-        for(ColumnMeta columnMeta : meta.getColumnMetas().values()){
-            if(columnMeta.select() && columnMeta.getAnnotation(JoinColumn.class) == null){
-                if(!first){
-                    sb.append(',');
+    private static SQL query(final Meta meta){
+        return new SQL(){{
+            for(ColumnMeta columnMeta : meta.getColumnMetas().values()){
+                if(columnMeta.select() && !columnMeta.isJoinColumn()){
+                    SELECT(columnMeta.getName());
                 }
-                sb.append(columnMeta.getName()).append(' ');
-                first = false;
             }
-        }
-        sb.append(" from ").append(meta.getTableName());
-        return sb;
+            FROM(meta.getTableName());
+        }};
     }
 
+
     public static String findAllFilter(Meta meta,Object object){
-        StringBuilder sb = query(meta);
-        StringBuilder whereSb = new StringBuilder();
-        boolean first = true;
+        if(object == null){
+            return findAll(meta);
+        }
+        SQL sql = query(meta);
         for(ColumnMeta column : meta.getColumnMetas().values()){
-            if(column.getAble() && column.getAnnotation(JoinColumn.class) == null){
+            if(column.getAble() && !column.isJoinColumn()){
                 Object value = column.get(object);
                 if(value != null){
-                    if(!first){
-                        whereSb.append(" and ");
-                    }
-                    whereSb.append(column.getName()).append(" = ? ");
-                    first = false;
+                    sql.WHERE(column.getName() + " = ?");
                 }
             }
         }
-        if(whereSb.length() > 0){
-            sb.append(" where ").append(whereSb);
-        }
-        return sb.toString();
+        return sql.toString();
     }
 }

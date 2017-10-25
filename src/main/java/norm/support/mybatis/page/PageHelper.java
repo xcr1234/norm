@@ -7,7 +7,7 @@ import org.apache.ibatis.executor.statement.StatementHandler;
 /**
  * MyBatis分页插件支持，只对mybatis框架有效
  */
-public final class PageHelper {
+public abstract class PageHelper {
 
 
     private static ThreadLocal<Page> pageThreadLocal = new ThreadLocal<Page>();
@@ -19,6 +19,10 @@ public final class PageHelper {
         return pageThreadLocal.get();
     }
 
+    public static Page setPage(Page page){
+        pageThreadLocal.set(page);
+        return page;
+    }
 
     public static Page setPage(int pageNumber,int pageSize){
         Page page = new Page(pageNumber,pageSize);
@@ -36,11 +40,21 @@ public final class PageHelper {
         pageThreadLocal.remove();
     }
 
-    private static int defaultPageSize = 15;
+    private static int defaultPageSize = 10;
     private static boolean defaultEvalCount = true;
     private static boolean collectResult = false;
     public static synchronized int getDefaultPageSize() {
         return defaultPageSize;
+    }
+
+    private static Integer maxPageSize;
+
+    public static Integer getMaxPageSize() {
+        return maxPageSize;
+    }
+
+    public static void setMaxPageSize(Integer maxPageSize) {
+        PageHelper.maxPageSize = maxPageSize;
     }
 
     public static synchronized void setDefaultPageSize(int defaultPageSize) {

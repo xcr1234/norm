@@ -30,9 +30,13 @@ public class MyMapperFactoryBean<T> extends MapperFactoryBean<T> {
     @Override
     public T getObject() throws Exception {
         T object = super.getObject();
-        CrudDao dao = norm.createDaoForType(this.getMapperInterface());
+        Class mapperInterface = this.getMapperInterface();
+        if(!CrudDao.class.isAssignableFrom(mapperInterface)){
+            return object;
+        }
+        CrudDaoImpl dao = norm.createDaoForType(mapperInterface);
         Enhancer enhancer = new Enhancer();
-        enhancer.setInterfaces(new Class[]{this.getMapperInterface(), NormAware.class});
+        enhancer.setInterfaces(new Class[]{mapperInterface, NormAware.class,MyBatisMapperAware.class});
         enhancer.setCallback(new MyBatisDaoSupport(object,dao));
         return (T) enhancer.create();
     }

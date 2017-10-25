@@ -4,7 +4,7 @@ package norm;
 import norm.cache.CacheManager;
 import norm.impl.DefaultSQLLogger;
 import norm.naming.DefaultTableNameStrategy;
-import norm.naming.TableNameStrategy;
+import norm.naming.NameStrategy;
 import norm.util.Args;
 
 
@@ -24,13 +24,17 @@ public final class Configuration  {
     private String username;
     private String password;
     private Properties info;
-    private TableNameStrategy tableNameStrategy;
+    private NameStrategy tableNameStrategy;
+    private NameStrategy columnNameStrategy = DefaultTableNameStrategy.DEFAULT;
     private SQLLogger sqlLogger;
-    private boolean driverRegistered;
+    boolean driverRegistered;
     private int maxRecursion = 3;
     private CacheManager cacheManager;
     private SQLFormatter sqlFormatter;
     private String database;
+
+    //oracle不支持自增id，这个必须设置为false，否则insert会保错
+    private boolean collectGenerateId = true;
 
     public Configuration() {
     }
@@ -137,7 +141,7 @@ public final class Configuration  {
 
     public Connection getConnection() throws SQLException{
         if(dataSource != null){
-            if(username != null && password != null){
+            if(username != null || password != null){
                 return dataSource.getConnection(username,password);
             }
             return dataSource.getConnection();
@@ -167,11 +171,11 @@ public final class Configuration  {
         this.sqlLogger = sqlLogger;
     }
 
-    public TableNameStrategy getTableNameStrategy() {
+    public NameStrategy getTableNameStrategy() {
         return tableNameStrategy == null ? DefaultTableNameStrategy.DEFAULT : tableNameStrategy;
     }
 
-    public void setTableNameStrategy(TableNameStrategy tableNameStrategy) {
+    public void setTableNameStrategy(NameStrategy tableNameStrategy) {
         Args.notNull(tableNameStrategy,"table naming strategy");
         this.tableNameStrategy = tableNameStrategy;
     }
@@ -206,19 +210,20 @@ public final class Configuration  {
         this.database = database.toLowerCase();
     }
 
-    @Override
-    public String toString() {
-        return "Configuration{" +
-                "formatSql=" + formatSql +
-                ", showSql=" + showSql +
-                ", dataSource=" + dataSource +
-                ", driverClass='" + driverClass + '\'' +
-                ", schema='" + schema + '\'' +
-                ", url='" + url + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", info=" + info +
-                ", maxRecursion=" + maxRecursion +
-                '}';
+    public NameStrategy getColumnNameStrategy() {
+        return columnNameStrategy;
+    }
+
+    public void setColumnNameStrategy(NameStrategy columnNameStrategy) {
+        Args.notNull(columnNameStrategy,"column naming");
+        this.columnNameStrategy = columnNameStrategy;
+    }
+
+    public boolean isCollectGenerateId() {
+        return collectGenerateId;
+    }
+
+    public void setCollectGenerateId(boolean collectGenerateId) {
+        this.collectGenerateId = collectGenerateId;
     }
 }

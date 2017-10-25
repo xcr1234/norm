@@ -7,8 +7,8 @@ import norm.QueryException;
 import norm.anno.AfterInstance;
 import norm.anno.Column;
 import norm.anno.Id;
-import norm.anno.JoinColumn;
-import norm.anno.Reference;
+//import norm.anno.JoinColumn;
+//import norm.anno.Reference;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -33,6 +33,7 @@ public final class ColumnMeta {
         this.getter = getter;
         this.name = name;
     }
+
 
     public Class getType(){
         if(getter != null){
@@ -61,7 +62,7 @@ public final class ColumnMeta {
         if (column != null && !"".equals(column.value())) {
             return column.value();
         }
-        return name;
+        return meta.getConfiguration().getColumnNameStrategy().format(name);
     }
 
     public boolean select(){
@@ -82,9 +83,9 @@ public final class ColumnMeta {
         if(getAnnotation(AfterInstance.class) != null){
             return false;
         }
-        if(getAnnotation(JoinColumn.class) != null){
-            return false;
-        }
+//        if(getAnnotation(JoinColumn.class) != null){
+//            return false;
+//        }
         Column column = getAnnotation(Column.class);
         Id id = getAnnotation(Id.class);
         return id == null ? column == null || column.insert() : (!id.identity() || !id.value().isEmpty());
@@ -97,9 +98,9 @@ public final class ColumnMeta {
         if(getAnnotation(AfterInstance.class) != null){
             return false;
         }
-        if(getAnnotation(JoinColumn.class) != null){
-            return false;
-        }
+//        if(getAnnotation(JoinColumn.class) != null){
+//            return false;
+//        }
         Column column = getAnnotation(Column.class);
         return column == null || column.update();
     }
@@ -127,11 +128,11 @@ public final class ColumnMeta {
     public Object get(Object obj)  {
         try {
             Object value = getter.invoke(obj);
-            Reference reference = getAnnotation(Reference.class);
-            if(reference != null && value != null){
-                Class type = getType();
-                return Meta.parse(type,meta.getConfiguration()).getColumnMetas().get(reference.target()).get(value);
-            }
+//            Reference reference = getAnnotation(Reference.class);
+//            if(reference != null && value != null){
+//                Class type = getType();
+//                return Meta.parse(type,meta.getConfiguration()).getColumnMetas().get(reference.target()).get(value);
+//            }
             return value;
         } catch (IllegalAccessException e) {
             throw new QueryException("can't get the value of "+toString(),e);
@@ -180,6 +181,15 @@ public final class ColumnMeta {
         result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
     }
+
+    public boolean isJoinColumn(){
+        return false;
+    }
+
+    public boolean isReference(){
+        return false;
+    }
+
 
 
 }

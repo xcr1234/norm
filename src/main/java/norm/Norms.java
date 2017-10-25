@@ -1,12 +1,11 @@
 package norm;
 
 import norm.cache.CacheManager;
-import norm.naming.TableNameStrategy;
+import norm.naming.NameStrategy;
 import norm.util.Args;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Properties;
 
 /**
@@ -96,11 +95,11 @@ public final class Norms  {
        return norm.setSqlLogger(sqlLogger);
     }
 
-    public static TableNameStrategy getTableNameStrategy() {
+    public static NameStrategy getTableNameStrategy() {
         return norm.getTableNameStrategy();
     }
 
-    public static Norm setTableNameStrategy(TableNameStrategy tableNameStrategy) {
+    public static Norm setTableNameStrategy(NameStrategy tableNameStrategy) {
         return norm.setTableNameStrategy(tableNameStrategy);
     }
 
@@ -180,6 +179,14 @@ public final class Norms  {
         return norm.isShowSql();
     }
 
+    public static boolean isCollectGenerateId() {
+        return norm.isCollectGenerateId();
+    }
+
+    public static void setCollectGenerateId(boolean collectGenerateId) {
+        norm.setCollectGenerateId(collectGenerateId);
+    }
+
     public static Norm setShowSql(boolean showSql) {
         return norm.setShowSql(showSql);
     }
@@ -199,5 +206,13 @@ public final class Norms  {
 
     public static Norm setSqlFormatter(SQLFormatter sqlFormatter) {
         return norm.setSqlFormatter(sqlFormatter);
+    }
+
+    public static NameStrategy getColumnNameStrategy() {
+        return norm.getColumnNameStrategy();
+    }
+
+    public static void setColumnNameStrategy(NameStrategy columnNameStrategy) {
+        norm.setColumnNameStrategy(columnNameStrategy);
     }
 }

@@ -3,17 +3,11 @@ package norm.impl;
 
 
 
-import javafx.scene.control.Tab;
 import norm.BeanException;
 import norm.Configuration;
-import norm.anno.AfterInstance;
-import norm.anno.Id;
-import norm.anno.JoinColumn;
-import norm.anno.Reference;
-import norm.anno.Table;
-import norm.anno.Transient;
-import norm.naming.DefaultTableNameStrategy;
-import norm.naming.TableNameStrategy;
+import norm.anno.*;
+
+import norm.naming.NameStrategy;
 import norm.util.Args;
 import norm.util.BeanUtils;
 
@@ -56,10 +50,12 @@ public final class Meta {
 
     private void init(){
 
-        try {
-            clazz.getDeclaredConstructor();
-        } catch (NoSuchMethodException e) {
-            throw new BeanException("invalid java bean class : "+clazz + " , no default constructor!");
+        if(!clazz.isAnnotationPresent(NoConstructor.class)){
+            try {
+                clazz.getDeclaredConstructor();
+            } catch (NoSuchMethodException e) {
+                throw new BeanException("invalid java bean class : "+clazz + " , no default constructor!");
+            }
         }
 
         Method[] methods = clazz.getDeclaredMethods();
@@ -130,20 +126,20 @@ public final class Meta {
         }
 
         //check reference.
-        for(ColumnMeta columnMeta : columnMetas.values()){
-            Reference reference = columnMeta.getAnnotation(Reference.class);
-            if(reference != null){
-                if(BeanUtils.isBaseClass(columnMeta.getType())){    //基本类型不支持@Reference注解
-                    throw new BeanException("base type doesn't support @Reference :" + columnMeta);
-                }
-                if(!Meta.parse(columnMeta.getType(),configuration).getColumnMetas().containsKey(reference.target())){
-                    throw new BeanException("reference target not found :" + reference.target() + " of "+columnMeta);
-                }
-            }
-            if(columnMeta.getAnnotation(JoinColumn.class) != null){
-                ref = true;
-            }
-        }
+//        for(ColumnMeta columnMeta : columnMetas.values()){
+//            Reference reference = columnMeta.getAnnotation(Reference.class);
+//            if(reference != null){
+//                if(BeanUtils.isBaseClass(columnMeta.getType())){    //基本类型不支持@Reference注解
+//                    throw new BeanException("base type doesn't support @Reference :" + columnMeta);
+//                }
+//                if(!Meta.parse(columnMeta.getType(),configuration).getColumnMetas().containsKey(reference.target())){
+//                    throw new BeanException("reference target not found :" + reference.target() + " of "+columnMeta);
+//                }
+//            }
+//            if(columnMeta.getAnnotation(JoinColumn.class) != null){
+//                ref = true;
+//            }
+//        }
     }
 
 
@@ -155,7 +151,7 @@ public final class Meta {
 
     }
 
-    public TableNameStrategy getTableNameStrategy() {
+    public NameStrategy getTableNameStrategy() {
         return configuration.getTableNameStrategy();
     }
 

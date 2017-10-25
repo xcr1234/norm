@@ -4,7 +4,6 @@ package norm.impl;
 import norm.BeanException;
 import norm.Configuration;
 import norm.QueryException;
-import norm.naming.TableNameStrategy;
 import norm.result.QueryResult;
 import norm.result.QueryResultItem;
 import norm.util.TypeUtils;
