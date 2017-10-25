@@ -17,6 +17,5 @@ public class SpringTest {
 
         List<User> userList = testService.findAll();
         System.out.println(userList);
-        System.out.println(userList.get(0).getRoleList());
     }
 }
