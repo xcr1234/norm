@@ -115,9 +115,10 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
                 }
                 if(norm.isCollectGenerateId()){
                     ResultSet gkRs = ps.getGeneratedKeys();
+                    ColumnMeta idColumn = meta.getIdColumn();
                     if (gkRs.next()) {
                         Object gkId = ResultSetHandler.get(gkRs, 1, meta.getIdColumn().getType(), meta.getIdColumn().toString());
-                        meta.getIdColumn().set(object, gkId);
+                        idColumn.set(object, gkId);
                         return object;
                     }
                 }
@@ -351,20 +352,15 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
         Object object = createObject(meta);
         for(ColumnMeta cm : meta.getColumnMetas().values()){
             if(set.contains(cm.getName())){
-                if(cm.isReference()){
-//                    if(recursion > norm.getConfiguration().getMaxRecursion()){
-//                        cm.set(object,null);
-//                    }else{
-//                        Meta targetMeta = Meta.parse(cm.getType(),norm.getConfiguration());
-//                        ColumnMeta targetColumn = targetMeta.getColumnMetas().get(reference.target());
-//                        Object referenceValue = ResultSetHandler.get(rs,cm.getName(),targetColumn.getType(),cm.toString());
-//                        Object value = findByColumn(referenceValue,targetMeta,targetColumn,recursion+1);
-//                        cm.set(object,value);
-//                    }
+
+                Object value = null;
+                if(cm.getTypeConverter() == null){
+                    ResultSetHandler.get(rs,cm.getName(),cm.getType(),cm.toString());
                 }else{
-                    Object value = ResultSetHandler.get(rs,cm.getName(),cm.getType(),cm.toString());
-                    cm.set(object,value);
+                    value = cm.getTypeConverter().getObject(rs,cm.getName());
                 }
+                cm.set(object,value);
+
             }
         }
 

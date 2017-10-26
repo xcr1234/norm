@@ -6,7 +6,9 @@ package norm.impl;
 import norm.QueryException;
 import norm.anno.AfterInstance;
 import norm.anno.Column;
+import norm.anno.Converter;
 import norm.anno.Id;
+import norm.convert.TypeConverter;
 //import norm.anno.JoinColumn;
 //import norm.anno.Reference;
 
@@ -14,6 +16,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public final class ColumnMeta {
 
@@ -32,6 +36,17 @@ public final class ColumnMeta {
         this.setter = setter;
         this.getter = getter;
         this.name = name;
+
+        Converter converter = getAnnotation(Converter.class);
+        if(converter != null){
+            try {
+                typeConverter = converter.value().newInstance();
+                typeConverter.init(converter.init());
+            } catch (Exception e) {
+                throw new QueryException("can't create converter for column : [" + this.toString() + "]",e);
+            }
+        }
+
     }
 
 
@@ -128,11 +143,9 @@ public final class ColumnMeta {
     public Object get(Object obj)  {
         try {
             Object value = getter.invoke(obj);
-//            Reference reference = getAnnotation(Reference.class);
-//            if(reference != null && value != null){
-//                Class type = getType();
-//                return Meta.parse(type,meta.getConfiguration()).getColumnMetas().get(reference.target()).get(value);
-//            }
+            if(typeConverter != null){
+                return typeConverter.setParameter(value);
+            }
             return value;
         } catch (IllegalAccessException e) {
             throw new QueryException("can't get the value of "+toString(),e);
@@ -190,6 +203,9 @@ public final class ColumnMeta {
         return false;
     }
 
+    private TypeConverter typeConverter;
 
-
+    public TypeConverter getTypeConverter() {
+        return typeConverter;
+    }
 }
