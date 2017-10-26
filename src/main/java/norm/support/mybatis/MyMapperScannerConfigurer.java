@@ -35,10 +35,10 @@ import java.util.Map;
  * interface dao应该继承{@link norm.CrudDao}接口，以支持基本的增删改查操作，并且可以自定义方法，用mybatis去管理。
  *
  * 例子：
- * public interface UserDao extends CrudDao<User,Integer>{
+ * public interface UserDao extends CrudDao&lt;User,Integer&gt;{
  *
  * {@code @Select("select * from user where id = #{0}")}
- * List<User> listBy(int a);
+ * List&lt;User&gt; listBy(int a);
  * }
  *
  * 在执行时，先判断norm框架是否实现了这个方法，如果没有实现，则转由Mybatis框架去执行
