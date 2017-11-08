@@ -388,8 +388,8 @@ public final class Norm implements Closeable{
         return pageSql;
     }
 
-    private static Map<String,PageSql> pageSqlMap = new HashMap<String,PageSql>();
-    public static void registerPageSql(PageSql pageSql){
+    private Map<String,PageSql> pageSqlMap = new HashMap<String,PageSql>();
+    public void registerPageSql(PageSql pageSql){
         if(pageSql == null){
             throw new IllegalArgumentException();
         }
@@ -413,7 +413,7 @@ public final class Norm implements Closeable{
         }
     }
 
-    static {
+     {
         registerPageSql(new Db2Page());
         registerPageSql(new DerbyPage());
         registerPageSql(new H2Page());

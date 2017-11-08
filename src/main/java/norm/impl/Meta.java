@@ -11,6 +11,7 @@ import norm.naming.NameStrategy;
 import norm.util.Args;
 import norm.util.BeanUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -46,6 +47,10 @@ public final class Meta {
 
     public List<Method> getAfterInstanceMethods() {
         return afterInstanceMethods;
+    }
+
+    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+        return (T) clazz.getAnnotation(annotationClass);
     }
 
     private void init(){

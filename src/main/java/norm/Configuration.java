@@ -8,6 +8,7 @@ import norm.naming.NameStrategy;
 import norm.util.Args;
 
 
+
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -226,4 +227,5 @@ public final class Configuration  {
     public void setCollectGenerateId(boolean collectGenerateId) {
         this.collectGenerateId = collectGenerateId;
     }
+
 }

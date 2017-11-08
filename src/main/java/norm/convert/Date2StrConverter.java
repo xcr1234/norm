@@ -19,7 +19,7 @@ public class Date2StrConverter implements TypeConverter<Date,String>{
     private SimpleDateFormat simpleDateFormat;
     private String format = defaultDateFormat;
 
-    private static String defaultDateFormat = "yyyyMMdd";
+    private static String defaultDateFormat = "yyyy-MM-dd";
 
     public static String getDefaultDateFormat() {
         return defaultDateFormat;
@@ -44,6 +44,9 @@ public class Date2StrConverter implements TypeConverter<Date,String>{
 
     @Override
     public Date setParameter(String value) {
+        if(value == null){
+            return null;
+        }
         synchronized (this){
             try {
                 return this.simpleDateFormat.parse(value);

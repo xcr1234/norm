@@ -20,6 +20,9 @@ public class Long2DateConverter implements TypeConverter<Long,Date>{
 
     @Override
     public Long setParameter(Date value) {
+        if(value == null){
+            return null;
+        }
         return value.getTime();
     }
 

@@ -1,7 +1,9 @@
 package norm;
 
 import norm.cache.CacheManager;
+import norm.impl.CrudDaoImpl;
 import norm.naming.NameStrategy;
+import norm.page.PageSql;
 import norm.util.Args;
 
 import javax.sql.DataSource;
@@ -25,6 +27,20 @@ public final class Norms  {
     public static void setNorm(Norm norm) {
         Args.notNull(norm,"default norm");
         Norms.norm = norm;
+    }
+
+
+    public static PageSql getPageSql() {
+        return norm.getPageSql();
+    }
+
+    public static void registerPageSql(PageSql pageSql) {
+        norm.registerPageSql(pageSql);
+    }
+
+
+    public static CrudDaoImpl createDaoForType(Class daoType) {
+        return norm.createDaoForType(daoType);
     }
 
     public static void closeConnection() {

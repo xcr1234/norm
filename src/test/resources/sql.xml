@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<sqls>
+    <query id="selectUser">
+        select * from User where id = ?
+    </query>
+    <update id="updateUser">
+        update User
+        set name = ?
+        where id = ?
+    </update>
+</sqls>

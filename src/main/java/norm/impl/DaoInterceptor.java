@@ -16,6 +16,7 @@ import norm.result.QueryResult;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
 public final class DaoInterceptor implements MethodInterceptor {
 
@@ -34,11 +35,13 @@ public final class DaoInterceptor implements MethodInterceptor {
 
     @Override
     public Object intercept(Object self, Method thisMethod, Object[] args, MethodProxy proxy) throws Throwable {
-        if(thisMethod.isAnnotationPresent(Query.class)){
-            return executeQuery(thisMethod,args,dbDao,daoClass);
+        Query query = thisMethod.getAnnotation(Query.class);
+        if(query != null){
+            return executeQuery(thisMethod,query.sql(),args,dbDao,daoClass);
         }
-        if(thisMethod.isAnnotationPresent(UpdateQuery.class)){
-            return executeUpdateQuery(thisMethod,args,dbDao,daoClass);
+        UpdateQuery updateQuery = thisMethod.getAnnotation(UpdateQuery.class);
+        if(updateQuery != null){
+            return executeUpdateQuery(thisMethod,updateQuery.sql(),args,dbDao,daoClass);
         }
         try {
             //如果是dbDao中的实现方法.
@@ -53,10 +56,8 @@ public final class DaoInterceptor implements MethodInterceptor {
         }
     }
 
-    public static Object executeQuery(Method thisMethod,Object[] args,CrudDaoImpl
+    public static Object executeQuery(Method thisMethod,String sql,Object[] args,CrudDaoImpl
                                       dao,Object dd){
-        Query query = thisMethod.getAnnotation(Query.class);
-        String sql = query.sql();
         Page page = null;
         Object[] params = null;
         if(args.length > 0 && args[args.length-1] instanceof Page){
@@ -85,19 +86,21 @@ public final class DaoInterceptor implements MethodInterceptor {
         }
     }
 
-    public static Object executeUpdateQuery(Method thisMethod,Object[] args,CrudDaoImpl
+    public static Object executeUpdateQuery(Method thisMethod,String sql,Object[] args,CrudDaoImpl
             dbDao,Object dd){
-        UpdateQuery updateQuery = thisMethod.getAnnotation(UpdateQuery.class);
         Class returnType = thisMethod.getReturnType();
         if(returnType == Void.class || returnType == void.class){
-            dbDao.updateQuery(updateQuery.sql(),args);
+            dbDao.updateQuery(sql,args);
             return null;
         }else if(returnType == int.class || returnType == Integer.class){
-            return dbDao.updateQuery(updateQuery.sql(),args);
+            return dbDao.updateQuery(sql,args);
         }else if(returnType == boolean.class || returnType == Boolean.class){
-            return dbDao.updateQuery(updateQuery.sql(),args) > 0;
+            return dbDao.updateQuery(sql,args) > 0;
         }else{
             throw new BeanException("illegal dao:" + dd+",invalid @UpdateQuery method "+thisMethod+" ,return type:"+returnType);
         }
     }
+
+
+
 }

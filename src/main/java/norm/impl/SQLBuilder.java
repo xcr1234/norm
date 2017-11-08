@@ -1,7 +1,9 @@
 package norm.impl;
 
+
 import norm.anno.Column;
 import norm.anno.Id;
+import norm.anno.OrderBy;
 import norm.jdbc.SQL;
 
 
@@ -59,6 +61,7 @@ public final class SQLBuilder {
                     SET(columnMeta.getName() + " = ?");
                 }
             }
+            WHERE(meta.getIdColumn().getName() + " = ?");
         }}.toString();
     }
 
@@ -86,6 +89,14 @@ public final class SQLBuilder {
                 }
             }
             FROM(meta.getTableName());
+            OrderBy orderBy = meta.getAnnotation(OrderBy.class);
+            if(orderBy != null){
+                if(orderBy.type() == OrderBy.Type.DEFAULT){
+                    ORDER_BY(orderBy.value());
+                }else{
+                    ORDER_BY(orderBy.value() + " " + orderBy.type().name());
+                }
+            }
         }};
     }
 
