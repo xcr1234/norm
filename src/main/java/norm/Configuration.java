@@ -208,6 +208,9 @@ public final class Configuration  {
 
     public void setDatabase(String database) {
         Args.notNull(database,"the database");
+        if("oracle".equalsIgnoreCase(database)){
+            this.collectGenerateId = false;
+        }
         this.database = database.toLowerCase();
     }
 

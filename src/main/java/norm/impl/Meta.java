@@ -49,10 +49,6 @@ public final class Meta {
         return afterInstanceMethods;
     }
 
-    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-        return (T) clazz.getAnnotation(annotationClass);
-    }
-
     private void init(){
 
         if(!clazz.isAnnotationPresent(NoConstructor.class)){
@@ -180,7 +176,7 @@ public final class Meta {
     }
 
     private ColumnMeta idColumn;
-    private Class clazz;
+    private Class<?> clazz;
     private Map<String,ColumnMeta> columnMetas = new LinkedHashMap<String,ColumnMeta>();
 
     public ColumnMeta getIdColumn() {
@@ -247,6 +243,7 @@ public final class Meta {
                 '}';
     }
 
-
-
+    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+        return (T) clazz.getAnnotation(annotationClass);
+    }
 }

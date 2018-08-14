@@ -9,7 +9,7 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD,ElementType.METHOD})
 public @interface Converter {
 
-    Class<? extends TypeConverter> value();
+    Class<? extends TypeConverter<?,?>> value();
 
     String init() default "";
 

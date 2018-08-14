@@ -17,6 +17,14 @@ public class NormServiceConfigurer  implements BeanPostProcessor,ApplicationCont
 
     private String normBeanName = "norm";
 
+    public String getNormBeanName() {
+        return normBeanName;
+    }
+
+    public void setNormBeanName(String normBeanName) {
+        this.normBeanName = normBeanName;
+    }
+
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
         return bean;
@@ -24,11 +32,13 @@ public class NormServiceConfigurer  implements BeanPostProcessor,ApplicationCont
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        Class cls = bean.getClass();
+        Class<?> cls = bean.getClass();
         if(cls.isAnnotationPresent(EnableCache.class)){
+            String name = cls.getAnnotation(EnableCache.class).bean();
+            String normName = name.isEmpty() ? normBeanName : name;
             log.debug("Creating Service with name '" + beanName
                     + "' and '" + cls.getName() + "' Class");
-            Norm norm = applicationContext.getBean(normBeanName,Norm.class);
+            Norm norm = applicationContext.getBean(normName,Norm.class);
             return norm.enableCache(bean);
         }
         return bean;

@@ -12,9 +12,9 @@ public class OraclePage implements PageSql {
         }
         pagingSelect.append(sql);
         if(page.offset() > 0){
-            pagingSelect.append(" ) row_ where rownum <= " + page.to() + ") where rownum_ > " + page.from());
+            pagingSelect.append(" ) row_ where rownum <= ").append(page.to()).append(") where rownum_ > ").append(page.from());
         }else{
-            pagingSelect.append(" ) where rownum <= " + page.limit());
+            pagingSelect.append(" ) where rownum <= ").append(page.limit());
         }
         return pagingSelect.toString();
     }

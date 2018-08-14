@@ -5,10 +5,7 @@ import norm.QueryException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 
 public final class ResultSetHandler {
@@ -38,8 +35,8 @@ public final class ResultSetHandler {
         }else if(type == byte[].class){
             return resultSet.getBytes(index);
         }else if(type == java.util.Date.class){ //这里需要转化一下
-            java.sql.Date sqlDate = resultSet.getDate(index);
-            return sqlDate == null ? null : new java.util.Date(sqlDate.getTime());
+            Date time = resultSet.getDate(index);
+            return time == null ? null : new java.util.Date(time.getTime());
         }else if(type == java.sql.Date.class){
             return resultSet.getDate(index);
         }else if(type == java.sql.Time.class){
@@ -51,11 +48,9 @@ public final class ResultSetHandler {
         }else if(type == Clob.class){
             return resultSet.getClob(index);
         }else if(InputStream.class.isAssignableFrom(type)){
-            Blob blob = resultSet.getBlob(index);
-            return blob == null ? null :blob.getBinaryStream();
+            return resultSet.getBlob(index).getBinaryStream();
         }else if(Reader.class.isAssignableFrom(type)) {
-            Clob clob = resultSet.getClob(index);
-            return clob == null ? null : clob.getCharacterStream();
+            return resultSet.getClob(index).getCharacterStream();
         }
         throw new QueryException("unsupported sql type :"+type + " of "+columnMeta);
     }
@@ -82,8 +77,8 @@ public final class ResultSetHandler {
         }else if(type == byte[].class){
             return resultSet.getBytes(index);
         }else if(type == java.util.Date.class){ //这里需要转化一下
-            java.sql.Date sqlDate = resultSet.getDate(index);
-            return sqlDate == null ? null : new java.util.Date(sqlDate.getTime());
+            Date time = resultSet.getDate(index);
+            return time == null ? null : new java.util.Date(time.getTime());
         }else if(type == java.sql.Date.class){
             return resultSet.getDate(index);
         }else if(type == java.sql.Time.class){
@@ -95,11 +90,9 @@ public final class ResultSetHandler {
         }else if(type == Clob.class){
             return resultSet.getClob(index);
         }else if(InputStream.class.isAssignableFrom(type)){
-            Blob blob = resultSet.getBlob(index);
-            return blob == null ? null :blob.getBinaryStream();
+            return resultSet.getBlob(index).getBinaryStream();
         }else if(Reader.class.isAssignableFrom(type)) {
-            Clob clob = resultSet.getClob(index);
-            return clob == null ? null : clob.getCharacterStream();
+            return resultSet.getClob(index).getCharacterStream();
         }
         throw new QueryException("unsupported sql type :"+type + " of "+columnMeta);
     }

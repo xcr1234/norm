@@ -3,6 +3,8 @@ package norm.impl;
 
 
 
+import norm.BeanException;
+import norm.ConvertException;
 import norm.QueryException;
 import norm.anno.AfterInstance;
 import norm.anno.Column;
@@ -26,6 +28,7 @@ public final class ColumnMeta {
     private Method getter;
     private String name;
     private Meta meta;
+    private TypeConverter typeConverter;
 
 
 
@@ -43,7 +46,7 @@ public final class ColumnMeta {
                 typeConverter = converter.value().newInstance();
                 typeConverter.init(converter.init());
             } catch (Exception e) {
-                throw new QueryException("can't create converter for column : [" + this.toString() + "]",e);
+                throw new BeanException("can't create converter for column : [" + this.toString() + "]",e);
             }
         }
 
@@ -143,8 +146,15 @@ public final class ColumnMeta {
     public Object get(Object obj)  {
         try {
             Object value = getter.invoke(obj);
+            if(value == null){
+                return null;
+            }
             if(typeConverter != null){
-                return typeConverter.setParameter(value);
+                try{
+                    return typeConverter.setParameter(value);
+                }catch (ClassCastException e){
+                    throw new ConvertException(typeConverter,value,e);
+                }
             }
             return value;
         } catch (IllegalAccessException e) {
@@ -202,8 +212,6 @@ public final class ColumnMeta {
     public boolean isReference(){
         return false;
     }
-
-    private TypeConverter typeConverter;
 
     public TypeConverter getTypeConverter() {
         return typeConverter;

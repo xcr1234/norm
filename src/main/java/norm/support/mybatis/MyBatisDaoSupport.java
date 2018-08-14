@@ -40,13 +40,11 @@ public class MyBatisDaoSupport implements MethodInterceptor {
             return handleByMyBatis(interfaceMethod,args);
         }
         Method normMethod = null;
-        Query query = interfaceMethod.getAnnotation(Query.class);
-        if(query != null){
-            return DaoInterceptor.executeQuery(interfaceMethod,query.sql(),args,dao,this.mapper);
+        if(interfaceMethod.isAnnotationPresent(Query.class)){
+            return DaoInterceptor.executeQuery(interfaceMethod,args,dao,this.mapper);
         }
-        UpdateQuery updateQuery = interfaceMethod.getAnnotation(UpdateQuery.class);
-        if(updateQuery != null){
-            return DaoInterceptor.executeUpdateQuery(interfaceMethod,updateQuery.sql(),args,dao,this.mapper);
+        if(interfaceMethod.isAnnotationPresent(UpdateQuery.class)){
+            return DaoInterceptor.executeUpdateQuery(interfaceMethod,args,dao,this.mapper);
         }
         try{
             normMethod = CrudDaoImpl.class.getDeclaredMethod(interfaceMethod.getName(),interfaceMethod.getParameterTypes());

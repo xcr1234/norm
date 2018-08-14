@@ -25,7 +25,7 @@ public class Page implements Serializable{
     private transient Object result;
 
     public Page(){
-        this(1);
+        this(1,PageHelper.getDefaultPageSize());
     }
 
     public Page(int pageNumber) {
@@ -72,14 +72,13 @@ public class Page implements Serializable{
         return result;
     }
 
+
     @Override
     public String toString() {
         return "Page{" +
                 "pageNumber=" + pageNumber +
                 ", pageSize=" + pageSize +
-                ", evalCount=" + evalCount +
                 ", total=" + total +
-                ", pageCount=" + pageCount +
                 '}';
     }
 

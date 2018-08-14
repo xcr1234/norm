@@ -1,6 +1,6 @@
 package norm.test.service;
 
-import norm.anno.Cacheable;
+import norm.anno.cache.Cache;
 
 import norm.support.spring.EnableCache;
 import norm.test.dao.UserDao;
@@ -17,7 +17,7 @@ public class TestService {
     @Autowired
     private UserDao userDao;
 
-    @Cacheable(value = "testCache")
+    @Cache(value = "testCache")
     public List<User> findAll(){
         return userDao.findAll();
     }

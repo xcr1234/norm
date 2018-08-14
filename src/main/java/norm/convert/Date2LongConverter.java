@@ -17,10 +17,7 @@ public class Date2LongConverter implements TypeConverter <java.util.Date,Long>{
 
     @Override
     public java.util.Date setParameter(Long value) {
-        if(value == null){
-            return null;
-        }
-        return new java.sql.Date(value);
+        return new Date(value);
     }
 
     @Override

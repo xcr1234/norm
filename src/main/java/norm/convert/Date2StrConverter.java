@@ -19,7 +19,7 @@ public class Date2StrConverter implements TypeConverter<Date,String>{
     private SimpleDateFormat simpleDateFormat;
     private String format = defaultDateFormat;
 
-    private static String defaultDateFormat = "yyyy-MM-dd";
+    private static String defaultDateFormat = "yyyyMMdd";
 
     public static String getDefaultDateFormat() {
         return defaultDateFormat;

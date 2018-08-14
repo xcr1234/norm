@@ -5,14 +5,11 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import norm.BeanException;
 import norm.Norm;
-import norm.Transactional;
-import norm.anno.CacheEvict;
-import norm.anno.CacheEvictAll;
-import norm.anno.CachePut;
-import norm.anno.Cacheable;
-import norm.anno.Name;
-import norm.anno.Transaction;
-import norm.cache.Cache;
+import norm.anno.*;
+import norm.anno.cache.Evict;
+import norm.anno.cache.EvictAll;
+import norm.anno.cache.Put;
+import norm.anno.cache.Cache;
 import norm.cache.CacheManager;
 import ognl.Ognl;
 import ognl.OgnlException;
@@ -124,11 +121,11 @@ public class ServiceInterceptor implements MethodInterceptor {
         CacheManager cacheManager = norm.getConfiguration().getCacheManager();
         if(cacheManager != null){
             //有Cacheable注解.
-            if(thisMethod.isAnnotationPresent(Cacheable.class)){
-                Cacheable cacheable = thisMethod.getAnnotation(Cacheable.class);
+            if(thisMethod.isAnnotationPresent(Cache.class)){
+                Cache cacheable = thisMethod.getAnnotation(Cache.class);
 
                 String key = createKey(cacheable.key(),thisMethod,args,null);
-                Cache cache = cacheManager.getCache(cacheable.value());
+                norm.cache.Cache cache = cacheManager.getCache(cacheable.value());
 
                 if(cache != null && filter(cacheable.condition(),thisMethod,args,null)){  //可以从cache中取值
                     value = cache.get(key,thisMethod.getReturnType());
@@ -146,12 +143,12 @@ public class ServiceInterceptor implements MethodInterceptor {
             }
 
             //如果有Cacheput注解，则执行原方法，然后放入cache.
-            if(thisMethod.isAnnotationPresent(CachePut.class)){
+            if(thisMethod.isAnnotationPresent(Put.class)){
                 Object thisValue = invokeSuper(self, thisMethod, proxy, args);//执行原方法
-                CachePut cachePut = thisMethod.getAnnotation(CachePut.class);
+                Put cachePut = thisMethod.getAnnotation(Put.class);
                 String key = createKey(cachePut.key(),thisMethod,args,thisValue);
 
-                Cache cache = cacheManager.getCache(cachePut.value());
+                norm.cache.Cache cache = cacheManager.getCache(cachePut.value());
                 if(cache != null && filter(cachePut.condition(),thisMethod,args,thisValue) && thisValue != null){
                     cache.put(key,thisValue);
                 }
@@ -159,10 +156,10 @@ public class ServiceInterceptor implements MethodInterceptor {
             }
 
             //如果有CacheEvict注解
-            if(thisMethod.isAnnotationPresent(CacheEvict.class)){
-                CacheEvict cacheEvict = thisMethod.getAnnotation(CacheEvict.class);
+            if(thisMethod.isAnnotationPresent(Evict.class)){
+                Evict cacheEvict = thisMethod.getAnnotation(Evict.class);
                 String key = createKey(cacheEvict.key(),thisMethod,args,null);
-                Cache cache = cacheManager.getCache(cacheEvict.value());
+                norm.cache.Cache cache = cacheManager.getCache(cacheEvict.value());
                 if(cache != null && filter(cacheEvict.condition(),thisMethod,args,null) && cacheEvict.beforeInvocation()){
                     if(cacheEvict.allEntries()){
                         cache.evictAll();
@@ -183,8 +180,8 @@ public class ServiceInterceptor implements MethodInterceptor {
             }
 
             //如果有CacheEvictAll注解，则清除全部cache.
-            if(thisMethod.isAnnotationPresent(CacheEvictAll.class)){
-                CacheEvictAll cacheEvictAll = thisMethod.getAnnotation(CacheEvictAll.class);
+            if(thisMethod.isAnnotationPresent(EvictAll.class)){
+                EvictAll cacheEvictAll = thisMethod.getAnnotation(EvictAll.class);
                 if(cacheEvictAll.beforeInvocation()){
                     cacheManager.evictAll();
                 }

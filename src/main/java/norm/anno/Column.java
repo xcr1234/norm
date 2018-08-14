@@ -42,4 +42,6 @@ public @interface Column {
      * @return 是否包含在update语句中
      */
     boolean update() default true;
+
+    String queryType() default "";
 }

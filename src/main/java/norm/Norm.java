@@ -4,11 +4,13 @@ package norm;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.NoOp;
+import norm.anno.Query;
 import norm.cache.CacheManager;
 import norm.impl.*;
 import norm.naming.NameStrategy;
 import norm.page.PageSql;
 import norm.page.impl.*;
+import norm.support.mybatis.InvokeMyBatis;
 import norm.util.Args;
 import norm.util.BasicFormatterImpl;
 import norm.util.BeanUtils;
@@ -388,8 +390,8 @@ public final class Norm implements Closeable{
         return pageSql;
     }
 
-    private Map<String,PageSql> pageSqlMap = new HashMap<String,PageSql>();
-    public void registerPageSql(PageSql pageSql){
+    private static Map<String,PageSql> pageSqlMap = new HashMap<String,PageSql>();
+    public static void registerPageSql(PageSql pageSql){
         if(pageSql == null){
             throw new IllegalArgumentException();
         }
@@ -413,7 +415,7 @@ public final class Norm implements Closeable{
         }
     }
 
-     {
+    static {
         registerPageSql(new Db2Page());
         registerPageSql(new DerbyPage());
         registerPageSql(new H2Page());

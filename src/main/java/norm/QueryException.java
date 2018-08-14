@@ -2,6 +2,7 @@ package norm;
 
 
 import java.sql.Connection;
+import java.util.List;
 
 /**
  * 在数据库查询的过程中遇到的异常。包括sql查询时的异常，获取数据库连接时抛出的异常。
@@ -19,14 +20,14 @@ public class QueryException extends RuntimeException{
     }
 
     public QueryException(String message, Throwable cause) {
-        super(message, cause);
+        super(message + ";\n nested exception is " + cause, cause);
     }
 
     private Class<?> type;
 
     private String sql;
 
-    private Object[] parameters;
+    private List<?> parameters;
 
     private Connection connection;
 
@@ -48,11 +49,11 @@ public class QueryException extends RuntimeException{
         this.sql = sql;
     }
 
-    public Object[] getParameters() {
+    public List<?> getParameters() {
         return parameters;
     }
 
-    public void setParameters(Object[] parameters) {
+    public void setParameters(List<?> parameters) {
         this.parameters = parameters;
     }
 
