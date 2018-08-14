@@ -378,7 +378,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
 
         Object object = createObject(meta);
         for(ColumnMeta cm : meta.getColumnMetas().values()){
-            if(set.contains(cm.getName())){
+            if(set.contains(cm.getName()) || set.contains(cm.getName().toUpperCase())){
 
                 Object value = null;
                 if(cm.getTypeConverter() == null){
