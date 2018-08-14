@@ -94,12 +94,6 @@ public final class SQLBuilder {
                     ORDER_BY(orderBy.value() + " " + orderBy.type().name());
                 }
             }
-            Filters filters = meta.getAnnotation(Filters.class);
-            if(filters != null){
-                for(Filter filter : filters.value()){
-                    WHERE(filter.value());
-                }
-            }
         }};
     }
 
