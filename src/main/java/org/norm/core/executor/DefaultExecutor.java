@@ -1,6 +1,10 @@
-package org.norm.core;
+package org.norm.core.executor;
 
 import org.norm.Configuration;
+import org.norm.core.handler.ResultSetHandler;
+import org.norm.core.parameter.Parameter;
+import org.norm.core.query.SelectQuery;
+import org.norm.core.query.UpdateQuery;
 import org.norm.page.Page;
 import org.norm.util.ErrorContext;
 
@@ -8,11 +12,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Executor {
+public class DefaultExecutor implements Executor {
 
     private Configuration configuration;
 
-    public Executor(Configuration configuration) {
+    public DefaultExecutor(Configuration configuration) {
         this.configuration = configuration;
     }
 

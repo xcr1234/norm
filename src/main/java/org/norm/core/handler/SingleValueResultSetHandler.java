@@ -1,6 +1,5 @@
 package org.norm.core.handler;
 
-import org.norm.core.ResultSetHandler;
 import org.norm.util.JdbcUtils;
 
 import java.sql.ResultSet;

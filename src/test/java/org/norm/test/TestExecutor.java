@@ -2,10 +2,11 @@ package org.norm.test;
 
 import org.junit.Test;
 import org.norm.Configuration;
-import org.norm.core.Executor;
-import org.norm.core.Parameter;
-import org.norm.core.ResultSetHandler;
-import org.norm.core.SelectQuery;
+import org.norm.core.executor.Executor;
+import org.norm.core.parameter.Parameter;
+import org.norm.core.handler.ResultSetHandler;
+import org.norm.core.query.SelectQuery;
+import org.norm.core.executor.DefaultExecutor;
 import org.norm.core.parameter.SimpleValueParameter;
 import org.norm.core.parameter.ValueParameter;
 import org.norm.page.Page;
@@ -41,7 +42,7 @@ public class TestExecutor extends BaseConnTest {
         configuration.setShowSql(true);
 
 
-        Executor executor = new Executor(configuration);
+        Executor executor = new DefaultExecutor(configuration);
         SelectQuery<Car> query = new SelectQuery<Car>();
         query.setSql("select * from cars");
         query.setParameters(Collections.<Parameter>emptyList());
@@ -56,7 +57,7 @@ public class TestExecutor extends BaseConnTest {
         configuration.setShowSql(true);
 
 
-        Executor executor = new Executor(configuration);
+        Executor executor = new DefaultExecutor(configuration);
         SelectQuery<Car> query = new SelectQuery<Car>();
         query.setSql("select * from cars where id = ? or name like ?");
         query.setParameters(Arrays.asList(new Parameter[]{
@@ -75,7 +76,7 @@ public class TestExecutor extends BaseConnTest {
         configuration.setShowSql(true);
 
 
-        Executor executor = new Executor(configuration);
+        Executor executor = new DefaultExecutor(configuration);
         SelectQuery<Car> query = new SelectQuery<Car>();
         query.setSql("select * from cars where id >= ?");
         query.setParameters(Arrays.asList(new Parameter[]{
@@ -100,20 +101,20 @@ public class TestExecutor extends BaseConnTest {
 
 
 
-        Executor executor = new Executor(configuration);
+        Executor executor = new DefaultExecutor(configuration);
         SelectQuery<Car> query = new SelectQuery<Car>();
         query.setSql("select * from cars");
         query.setParameters(Collections.<Parameter>emptyList());
         query.setResultSetHandler(carHandler);
 
-        Page page = new Page(1,2);  //第一页，每页两条
+        Page<Car> page = new Page<Car>(1,2);  //第一页，每页两条
         executor.processPage(connection,query,page);
 
         List<Car> list = executor.selectList(connection,query);
         System.out.println("list = " + list);
         System.out.println(page);
 
-        page = new Page(2,2);
+        page = new Page<Car>(2,2);
         page.setEvalCount(true);
 
         query.setSql("select * from cars");
@@ -122,7 +123,7 @@ public class TestExecutor extends BaseConnTest {
         System.out.println("list = " + list);
         System.out.println(page);
 
-        page = new Page(3,2);
+        page = new Page<Car>(3,2);
         page.setEvalCount(false);
 
         query.setSql("select * from cars");

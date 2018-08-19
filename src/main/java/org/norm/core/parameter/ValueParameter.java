@@ -1,6 +1,5 @@
 package org.norm.core.parameter;
 
-import org.norm.core.Parameter;
 import org.norm.util.ErrorContext;
 
 import java.sql.PreparedStatement;

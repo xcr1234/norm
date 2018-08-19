@@ -1,4 +1,4 @@
-package org.norm.core;
+package org.norm.core.parameter;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

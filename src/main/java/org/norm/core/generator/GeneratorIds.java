@@ -1,4 +1,4 @@
-package org.norm.core;
+package org.norm.core.generator;
 
 public interface GeneratorIds {
     String SAVE = "save";

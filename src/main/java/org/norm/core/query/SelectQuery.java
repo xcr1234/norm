@@ -1,6 +1,7 @@
-package org.norm.core;
+package org.norm.core.query;
 
-import java.util.List;
+import org.norm.core.handler.ResultSetHandler;
+import org.norm.core.parameter.Parameter;
 
 public class SelectQuery<T>{
     private String sql;

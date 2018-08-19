@@ -8,6 +8,16 @@ import java.sql.*;
 
 public final class JdbcUtils {
 
+    public static void setParameter(PreparedStatement ps,int index,Object value,int nullType,Integer type) throws SQLException{
+        if(value == null){
+            ps.setNull(index,nullType);
+        }else if(type != null){
+            ps.setObject(index,value,type);
+        }else{
+            setParameter(ps,index,value);
+        }
+    }
+
     public static void setParameter(PreparedStatement ps, int index, Object value) throws SQLException {
         if (value instanceof String) {
             ps.setString(index, (String) value);

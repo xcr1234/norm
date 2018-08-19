@@ -2,13 +2,14 @@ package org.norm.core.interceptor;
 
 import net.sf.cglib.proxy.MethodProxy;
 import org.norm.anno.Query;
-import org.norm.core.SelectQuery;
-import org.norm.core.UpdateQuery;
+import org.norm.core.query.SelectQuery;
+import org.norm.core.query.UpdateQuery;
 import org.norm.core.handler.SingleValueResultSetHandler;
 import org.norm.core.parameter.ArrayParameters;
 import org.norm.exception.BeanException;
 import org.norm.page.Page;
 import org.norm.util.BaseMethodInterceptor;
+import org.norm.util.ReflectUtils;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -16,11 +17,11 @@ import java.util.List;
 public class CrudDaoInterceptor extends BaseMethodInterceptor {
 
     private CrudDaoImpl crudDao;
-    private Class<?> daoClass;
     private Class<?> beanClass;
 
     public CrudDaoInterceptor(CrudDaoImpl crudDao) {
         this.crudDao = crudDao;
+        this.beanClass = crudDao.getBeanClass();
     }
 
     @Override
@@ -31,10 +32,13 @@ public class CrudDaoInterceptor extends BaseMethodInterceptor {
             return handleQuery(query, method, args);
         }else if(updateQuery != null){
             return handleUpdateQuery(updateQuery,method,args);
-        }else{
-
         }
-        return null;
+        Method thisMethod = ReflectUtils.getMethodOrNull(CrudDaoImpl.class,method.getName(),method.getParameterTypes());
+        if(thisMethod != null){
+            //如果是dbDao中的实现方法.
+            return ReflectUtils.invoke(thisMethod,crudDao,args);
+        }
+        return proxy.invokeSuper(obj,args);
     }
 
     @SuppressWarnings("unchecked")

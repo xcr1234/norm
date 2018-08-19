@@ -1,8 +1,7 @@
 package org.norm.core.generator;
 
-import org.norm.core.QueryGenerator;
-import org.norm.core.ResultSetHandler;
-import org.norm.core.SelectQuery;
+import org.norm.core.handler.ResultSetHandler;
+import org.norm.core.query.SelectQuery;
 
 public abstract class BaseUpdateGenerator implements QueryGenerator{
     @Override

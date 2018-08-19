@@ -79,7 +79,7 @@ public interface CrudDao <T,ID>{
      * @param page 分页查询，
      * @return 所有的实体List（已分页）
      */
-    List<T> findAll(Page page);
+    List<T> findAll(Page<T> page);
 
     /**
      * 返回所有的实体List，支持分页查询，参数做为查询条件，返回值其实是一个{@link java.util.ArrayList}
@@ -94,6 +94,6 @@ public interface CrudDao <T,ID>{
      * @param page
      * @return
      */
-    List<T> findAll(T t, Page page);
+    List<T> findAll(T t, Page<T> page);
 
 }

@@ -1,4 +1,4 @@
-package org.norm.core;
+package org.norm.core.handler;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

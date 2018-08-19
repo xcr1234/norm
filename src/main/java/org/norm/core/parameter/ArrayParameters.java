@@ -1,7 +1,5 @@
 package org.norm.core.parameter;
 
-import org.norm.core.Parameter;
-
 import java.util.Iterator;
 
 public class ArrayParameters implements Iterable<Parameter> {

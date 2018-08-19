@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 表示自定义sql语句的查询。这个sql查询是select查询，返回值可以是Bean实体、List、或者java基本类型
+ * 表示自定义sql语句的查询。这个sql查询是select查询，返回值可以是Bean实体、List（实体）、或者java基本类型
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

@@ -2,7 +2,11 @@ package org.norm.core.interceptor;
 
 import org.norm.Configuration;
 import org.norm.CrudDao;
-import org.norm.core.*;
+import org.norm.core.executor.Executor;
+import org.norm.core.generator.GeneratorIds;
+import org.norm.core.generator.QueryGenerator;
+import org.norm.core.query.SelectQuery;
+import org.norm.core.query.UpdateQuery;
 import org.norm.page.Page;
 import org.norm.util.AssertUtils;
 import org.norm.util.ErrorContext;
@@ -16,11 +20,13 @@ public class CrudDaoImpl implements CrudDao<Object, Object> {
     private Configuration configuration;
     private QueryGenerator generator;
     private Executor executor;
+    private Class<?> daoClass;
+    private Class<?> beanClass;
 
     public CrudDaoImpl(Configuration configuration, QueryGenerator generator) {
         this.configuration = configuration;
         this.generator = generator;
-        this.executor = new Executor(configuration);
+        this.executor = configuration.getExecutorFactory().getExecutor(configuration);
     }
 
     public Configuration getConfiguration() {
@@ -29,6 +35,22 @@ public class CrudDaoImpl implements CrudDao<Object, Object> {
 
     public QueryGenerator getGenerator() {
         return generator;
+    }
+
+    public Class<?> getDaoClass() {
+        return daoClass;
+    }
+
+    public void setDaoClass(Class<?> daoClass) {
+        this.daoClass = daoClass;
+    }
+
+    public Class<?> getBeanClass() {
+        return beanClass;
+    }
+
+    public void setBeanClass(Class<?> beanClass) {
+        this.beanClass = beanClass;
     }
 
     private boolean generateAndUpdate(String id, Object object){
@@ -75,12 +97,14 @@ public class CrudDaoImpl implements CrudDao<Object, Object> {
         }
     }
 
-    public <T> List<T> selectPage(SelectQuery<T> query,Page page){
+    public <T> List<T> selectPage(SelectQuery<T> query,Page<T> page){
         Connection connection = null;
         try{
             connection = configuration.openConnection();
             executor.processPage(connection,query,page);
-            return executor.selectList(connection,query);
+            List<T> list = executor.selectList(connection,query);
+            page.setRecords(list);
+            return list;
         }catch (Exception e){
             throw ExceptionUtils.wrap(e);
         }finally {

@@ -1,4 +1,6 @@
-package org.norm.core;
+package org.norm.core.query;
+
+import org.norm.core.parameter.Parameter;
 
 public class UpdateQuery{
     private String sql;

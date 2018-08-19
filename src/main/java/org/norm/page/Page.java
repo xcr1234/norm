@@ -3,8 +3,9 @@ package org.norm.page;
 
 
 import java.io.Serializable;
+import java.util.List;
 
-public class Page implements Serializable{
+public class Page<E> implements Serializable{
 
 
     private static final long serialVersionUID = -6798071663464647031L;
@@ -34,6 +35,7 @@ public class Page implements Serializable{
     private boolean evalCount;
     private Integer total;
     private Integer pageCount;
+    private List<E> records;
 
     public Page(){
         this(1,defaultPageSize);
@@ -160,4 +162,12 @@ public class Page implements Serializable{
         this.pageCount = pageCount;
     }
 
+
+    public List<E> getRecords() {
+        return records;
+    }
+
+    public void setRecords(List<E> records) {
+        this.records = records;
+    }
 }
