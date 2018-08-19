@@ -1,53 +1,51 @@
 package org.norm;
 
-import org.norm.meta.MetaFactory;
-import org.norm.naming.NameStrategy;
+
+import org.norm.core.log.SqlLogger;
+import org.norm.core.log.DefaultSqlLogger;
+import org.norm.page.PageSql;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class Configuration {
-    private String schema;
-    private NameStrategy tableNameStrategy;
-    private NameStrategy columnNameStrategy;
-    private MetaFactory metaFactory;
-    private int nullJdbcType;
+    private boolean showSql;
+    private PageSql pageSql;
+    private SqlLogger sqlLogger = new DefaultSqlLogger();
 
-
-    public String getSchema() {
-        return schema;
+    public boolean isShowSql() {
+        return showSql;
     }
 
-    public void setSchema(String schema) {
-        this.schema = schema;
+    public void setShowSql(boolean showSql) {
+        this.showSql = showSql;
     }
 
-    public NameStrategy getTableNameStrategy() {
-        return tableNameStrategy;
+    public SqlLogger getSqlLogger() {
+        return sqlLogger;
     }
 
-    public void setTableNameStrategy(NameStrategy tableNameStrategy) {
-        this.tableNameStrategy = tableNameStrategy;
+    public void setSqlLogger(SqlLogger sqlLogger) {
+        this.sqlLogger = sqlLogger;
     }
 
-    public NameStrategy getColumnNameStrategy() {
-        return columnNameStrategy;
+    public PageSql getPageSql() {
+        return pageSql;
     }
 
-    public void setColumnNameStrategy(NameStrategy columnNameStrategy) {
-        this.columnNameStrategy = columnNameStrategy;
+    public void setPageSql(PageSql pageSql) {
+        this.pageSql = pageSql;
     }
 
-    public MetaFactory getMetaFactory() {
-        return metaFactory;
+    public Connection getConnection()throws SQLException{
+        return null;
     }
 
-    public void setMetaFactory(MetaFactory metaFactory) {
-        this.metaFactory = metaFactory;
+    public Connection openConnection()throws SQLException{
+        return null;
     }
 
-    public int getNullJdbcType() {
-        return nullJdbcType;
-    }
+    public void releaseConnection(Connection connection){
 
-    public void setNullJdbcType(int nullJdbcType) {
-        this.nullJdbcType = nullJdbcType;
     }
 }

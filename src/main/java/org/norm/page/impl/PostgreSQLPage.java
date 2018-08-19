@@ -1,6 +1,6 @@
 package org.norm.page.impl;
-import norm.page.Page;
-import norm.page.PageSql;
+import org.norm.page.Page;
+import org.norm.page.PageSql;
 public class PostgreSQLPage implements PageSql {
     @Override
     public String buildSql(Page page, String sql) {

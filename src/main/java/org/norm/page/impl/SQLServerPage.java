@@ -1,7 +1,7 @@
 package org.norm.page.impl;
 
-import norm.page.Page;
-import norm.page.PageSql;
+import org.norm.page.Page;
+import org.norm.page.PageSql;
 
 public class SQLServerPage implements PageSql {
     @Override

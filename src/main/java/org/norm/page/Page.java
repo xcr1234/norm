@@ -34,7 +34,6 @@ public class Page<T> implements Serializable{
     private boolean evalCount;
     private Integer total;
     private Integer pageCount;
-    private transient T result;
 
     public Page(){
         this(1,defaultPageSize);
@@ -159,14 +158,6 @@ public class Page<T> implements Serializable{
 
     public void setPageCount(Integer pageCount) {
         this.pageCount = pageCount;
-    }
-
-    public T getResult() {
-        return result;
-    }
-
-    public void setResult(T result) {
-        this.result = result;
     }
 
 }

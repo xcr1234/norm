@@ -25,6 +25,14 @@ public class ReflectUtils {
         }
     }
 
+    public static Class<?> getClassOrNull(String name){
+        try {
+            return Class.forName(name);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+
     public static Object invoke(Method method,Object object,Object... args){
         try {
             return method.invoke(object,args);
@@ -32,6 +40,15 @@ public class ReflectUtils {
             throw new ReflectionException("cannot invoke method:" + method , e);
         } catch (InvocationTargetException e) {
             throw new ReflectionException("cannot invoke method:" + method , e.getCause());
+        }
+    }
+
+    public static boolean inClasspath(String name){
+        try {
+            Class.forName(name,false,ReflectUtils.class.getClassLoader());
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
         }
     }
 }

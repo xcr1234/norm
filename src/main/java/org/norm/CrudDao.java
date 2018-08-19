@@ -1,5 +1,6 @@
 package org.norm;
 
+import org.norm.exception.QueryException;
 import org.norm.page.Page;
 
 import java.util.List;
@@ -16,9 +17,9 @@ public interface CrudDao <T,ID>{
     /**
      * 将实体对象保存（insert）到数据库中
      * @param t 待保存的对象，不可为null
-     * @return 若保存成功则返回该对象（对自增主键会自动处理），若不成功则返回null.
+     * @return 若保存成功则返回true，若不成功则返回false.
      */
-    T save(T t);
+    boolean save(T t);
 
     /**
      * 删除存在的java实体（根据id删除）

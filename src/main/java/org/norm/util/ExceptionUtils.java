@@ -8,24 +8,21 @@ import java.util.List;
 public class ExceptionUtils {
 
 
-    public static QueryException parse(Exception cause){
+    public static QueryException wrap(Exception cause){
         Throwable t = cause;
         if(cause instanceof InvocationTargetException){
             t = ((InvocationTargetException) cause).getTargetException();
         }
-        ErrorContext errorContext = ErrorContext.getInstance();
+        ErrorContext errorContext = ErrorContext.instance();
         StringBuilder sb = new StringBuilder();
         sb.append("an error occurred when execute jdbc query,nested exception is :").append(t).append('\n');
-        sb.append("this error happened when ").append(errorContext.getState()).append('\n');
-        sb.append("sql:").append(errorContext.getSql()).append('\n');
-        sb.append("params:");
+        sb.append("this error happened at : ").append(errorContext.getState()).append('\n');
+        sb.append("sql: ").append(errorContext.getSql()).append('\n');
+        sb.append("params: ");
         showParameters(sb,errorContext.getParams());
         sb.append('\n');
         if(errorContext.getParameter() != null){
-            sb.append("current property:").append(errorContext.getParameter().getProperty()).append('\n');
-        }
-        if(cause instanceof QueryException){
-            return new QueryException(sb.toString());
+            sb.append("current parameter:").append(errorContext.getParameter().getErrInfo()).append('\n');
         }
         return new QueryException(sb.toString(),cause);
     }

@@ -1,6 +1,8 @@
 package org.norm.util;
 
-import org.norm.result.Parameter;
+
+
+import org.norm.core.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +12,8 @@ public class ErrorContext {
 
     private String sql;
     private List<Object> params;
-    private Parameter parameter;
     private String state;
+    private Parameter parameter;
 
     private ErrorContext(){
 
@@ -24,7 +26,7 @@ public class ErrorContext {
         }
     };
 
-    public static ErrorContext getInstance(){
+    public static ErrorContext instance(){
         return local.get();
     }
 

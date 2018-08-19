@@ -130,4 +130,82 @@ public final class JdbcUtils {
         }
         throw new SQLException("can't get object:unsupported type :"+type);
     }
+
+    public static Object getObject(ResultSet resultSet, int index, Class<?> type)throws SQLException{
+        if(type == String.class){
+            return resultSet.getString(index);
+        }else if(type == Boolean.class || type == boolean.class){
+            boolean b = resultSet.getBoolean(index);
+            if(resultSet.wasNull()){
+                return null;
+            }
+            return b;
+        }else if(type == Byte.class || type == byte.class){
+            byte b = resultSet.getByte(index);
+            if(resultSet.wasNull()){
+                return null;
+            }
+            return b;
+        }else if(type == Short.class || type == short.class){
+            short s = resultSet.getShort(index);
+            if(resultSet.wasNull()){
+                return null;
+            }
+            return s;
+        }else if(type == Integer.class || type == int.class){
+            int i = resultSet.getInt(index);
+            if(resultSet.wasNull()){
+                return null;
+            }
+            return i;
+        }else if(type == Long.class || type == long.class){
+            long l = resultSet.getLong(index);
+            if(resultSet.wasNull()){
+                return null;
+            }
+            return l;
+        }else if(type == Float.class || type == float.class){
+            float f = resultSet.getFloat(index);
+            if(resultSet.wasNull()){
+                return null;
+            }
+            return f;
+        }else if(type == Double.class || type == double.class){
+            double d =  resultSet.getDouble(index);
+            if(resultSet.wasNull()){
+                return null;
+            }
+            return d;
+        }else if(type == BigDecimal.class){
+            return resultSet.getBigDecimal(index);
+        }else if(type == byte[].class){
+            return resultSet.getBytes(index);
+        }else if(type == java.util.Date.class){
+            Timestamp timestamp = resultSet.getTimestamp(index);
+            return timestamp == null ? null : new java.util.Date(timestamp.getTime());
+        }else if(type == java.sql.Date.class){
+            return resultSet.getDate(index);
+        }else if(type == java.sql.Time.class){
+            return resultSet.getTime(index);
+        }else if(type == java.sql.Timestamp.class){
+            return resultSet.getTimestamp(index);
+        }else if(type == Blob.class){
+            return resultSet.getBlob(index);
+        }else if(type == Clob.class){
+            return resultSet.getClob(index);
+        }else if(InputStream.class.isAssignableFrom(type)){
+            Blob blob = resultSet.getBlob(index);
+            if(blob == null){
+                return null;
+            }
+            return resultSet.getBlob(index).getBinaryStream();
+        }else if(Reader.class.isAssignableFrom(type)) {
+            Clob clob = resultSet.getClob(index);
+            if(clob == null){
+                return null;
+            }
+            return clob.getCharacterStream();
+        }
+        throw new SQLException("can't get object:unsupported type :"+type);
+    }
 }

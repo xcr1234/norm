@@ -44,4 +44,6 @@ public @interface Column {
     boolean update() default true;
 
     String queryType() default "";
+
+    int jdbcType() default Integer.MAX_VALUE;
 }
