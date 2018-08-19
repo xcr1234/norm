@@ -1,6 +1,7 @@
 package org.norm.core.parameter;
 
 import org.norm.core.Parameter;
+import org.norm.util.ErrorContext;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -16,6 +17,7 @@ public class ValueParameter implements Parameter{
 
     @Override
     public void setParameter(PreparedStatement ps, int index) throws SQLException {
+        ErrorContext.instance().addParam(value);
         ps.setObject(index,value);
     }
 

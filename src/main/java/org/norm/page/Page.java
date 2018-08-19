@@ -4,7 +4,7 @@ package org.norm.page;
 
 import java.io.Serializable;
 
-public class Page<T> implements Serializable{
+public class Page implements Serializable{
 
 
     private static final long serialVersionUID = -6798071663464647031L;

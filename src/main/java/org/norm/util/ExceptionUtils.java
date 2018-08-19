@@ -16,7 +16,7 @@ public class ExceptionUtils {
         ErrorContext errorContext = ErrorContext.instance();
         StringBuilder sb = new StringBuilder();
         sb.append("an error occurred when execute jdbc query,nested exception is :").append(t).append('\n');
-        sb.append("this error happened at : ").append(errorContext.getState()).append('\n');
+        sb.append("this error happened at state: ").append(errorContext.getState()).append('\n');
         sb.append("sql: ").append(errorContext.getSql()).append('\n');
         sb.append("params: ");
         showParameters(sb,errorContext.getParams());
@@ -47,6 +47,7 @@ public class ExceptionUtils {
             if(!first)sb.append(" , ");
             first = false;
         }
+        sb.append(']');
     }
 
 }

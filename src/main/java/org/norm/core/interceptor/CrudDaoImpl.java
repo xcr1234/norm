@@ -75,7 +75,7 @@ public class CrudDaoImpl implements CrudDao<Object, Object> {
         }
     }
 
-    public <T> List<T> selectPage(SelectQuery<T> query,Page<T> page){
+    public <T> List<T> selectPage(SelectQuery<T> query,Page page){
         Connection connection = null;
         try{
             connection = configuration.openConnection();

@@ -6,7 +6,10 @@ import org.norm.core.Executor;
 import org.norm.core.Parameter;
 import org.norm.core.ResultSetHandler;
 import org.norm.core.SelectQuery;
+import org.norm.core.parameter.SimpleValueParameter;
 import org.norm.core.parameter.ValueParameter;
+import org.norm.page.Page;
+import org.norm.page.impl.H2Page;
 import org.norm.test.beans.Car;
 import org.norm.util.ExceptionUtils;
 
@@ -16,7 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class Test1 extends BaseConnTest {
+public class TestExecutor extends BaseConnTest {
 
     private ResultSetHandler<Car> carHandler = new ResultSetHandler<Car>() {
         @Override
@@ -76,7 +79,7 @@ public class Test1 extends BaseConnTest {
         SelectQuery<Car> query = new SelectQuery<Car>();
         query.setSql("select * from cars where id >= ?");
         query.setParameters(Arrays.asList(new Parameter[]{
-                new ValueParameter("id",1)
+                new SimpleValueParameter(1)
         }));
         query.setResultSetHandler(carHandler);
 
@@ -86,5 +89,46 @@ public class Test1 extends BaseConnTest {
             ExceptionUtils.wrap(e).printStackTrace();
             throw e;
         }
+    }
+
+    //测试分页查询
+    @Test
+    public void test4() throws SQLException {
+        Configuration configuration = new Configuration();
+        configuration.setShowSql(true);
+        configuration.setPageSql(new H2Page());
+
+
+
+        Executor executor = new Executor(configuration);
+        SelectQuery<Car> query = new SelectQuery<Car>();
+        query.setSql("select * from cars");
+        query.setParameters(Collections.<Parameter>emptyList());
+        query.setResultSetHandler(carHandler);
+
+        Page page = new Page(1,2);  //第一页，每页两条
+        executor.processPage(connection,query,page);
+
+        List<Car> list = executor.selectList(connection,query);
+        System.out.println("list = " + list);
+        System.out.println(page);
+
+        page = new Page(2,2);
+        page.setEvalCount(true);
+
+        query.setSql("select * from cars");
+        executor.processPage(connection,query,page);
+        list = executor.selectList(connection,query);
+        System.out.println("list = " + list);
+        System.out.println(page);
+
+        page = new Page(3,2);
+        page.setEvalCount(false);
+
+        query.setSql("select * from cars");
+        executor.processPage(connection,query,page);
+        list = executor.selectList(connection,query);
+        System.out.println("list = " + list);
+        System.out.println(page);
     }
 }

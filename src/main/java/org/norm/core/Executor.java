@@ -73,7 +73,7 @@ public class Executor {
         }
     }
 
-    public <T> void processPage(Connection connection, SelectQuery<T> query, Page<T> page)throws SQLException{
+    public <T> void processPage(Connection connection, SelectQuery<T> query, Page page)throws SQLException{
         String sql = query.getSql();
         if(page.isEvalCount()){
             String countSql = "select count(1) from ( " + sql + " )";
@@ -113,6 +113,7 @@ public class Executor {
             parameter.setParameter(ps,index);
             index++;
         }
+        errorContext.setParameter(null);
     }
 
     private void closeObjects(PreparedStatement ps, ResultSet rs) {
