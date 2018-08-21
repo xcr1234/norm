@@ -6,6 +6,7 @@ package org.norm.core.meta;
 //import norm.anno.JoinColumn;
 //import norm.anno.Reference;
 
+import org.norm.Configuration;
 import org.norm.TypeConverter;
 import org.norm.anno.AfterInstance;
 import org.norm.anno.Column;
@@ -45,6 +46,10 @@ public final class ColumnMeta {
             typeConverter.init(converter.init());
         }
 
+    }
+
+    public Configuration getConfiguration(){
+        return meta.getConfiguration();
     }
 
 
@@ -113,6 +118,9 @@ public final class ColumnMeta {
             return false;
         }
         if(getAnnotation(AfterInstance.class) != null){
+            return false;
+        }
+        if(getAnnotation(Id.class) != null){
             return false;
         }
 //        if(getAnnotation(JoinColumn.class) != null){

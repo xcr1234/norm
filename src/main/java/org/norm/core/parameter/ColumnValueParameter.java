@@ -1,34 +1,29 @@
 package org.norm.core.parameter;
 
-import org.norm.Configuration;
 import org.norm.core.meta.ColumnMeta;
-import org.norm.core.meta.Meta;
 import org.norm.util.ErrorContext;
 import org.norm.util.JdbcUtils;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class ColumnParameter implements Parameter {
-
+public class ColumnValueParameter implements Parameter{
     private ColumnMeta columnMeta;
-    private Object object;
+    private Object value;
 
-    public ColumnParameter(ColumnMeta columnMeta, Object object) {
+    public ColumnValueParameter(ColumnMeta columnMeta, Object value) {
         this.columnMeta = columnMeta;
-        this.object = object;
+        this.value = value;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void setParameter(PreparedStatement ps, int index) throws SQLException {
-        Configuration configuration = ErrorContext.instance().getConfiguration();
-        Object value = columnMeta.get(object);
         ErrorContext.instance().addParam(value);
         if(columnMeta.getTypeConverter() != null){
             columnMeta.getTypeConverter().setParameter(ps,index,value);
         }else{
-            JdbcUtils.setParameter(ps,index,value,configuration.getJdbcNullType(),columnMeta.getJdbcType());
+            JdbcUtils.setParameter(ps,index,value,columnMeta.getConfiguration().getJdbcNullType(),columnMeta.getJdbcType());
         }
     }
 

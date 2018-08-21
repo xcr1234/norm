@@ -1,5 +1,6 @@
 package org.norm.core.interceptor;
 
+import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import org.norm.anno.Query;
 import org.norm.core.query.SelectQuery;
@@ -7,14 +8,14 @@ import org.norm.core.query.UpdateQuery;
 import org.norm.core.handler.SingleValueResultSetHandler;
 import org.norm.core.parameter.ArrayParameters;
 import org.norm.exception.BeanException;
+import org.norm.exception.ExecutorException;
 import org.norm.page.Page;
-import org.norm.util.BaseMethodInterceptor;
 import org.norm.util.ReflectUtils;
 
 import java.lang.reflect.Method;
 import java.util.List;
 
-public class CrudDaoInterceptor extends BaseMethodInterceptor {
+public class CrudDaoInterceptor implements MethodInterceptor {
 
     private CrudDaoImpl crudDao;
     private Class<?> beanClass;
@@ -25,7 +26,7 @@ public class CrudDaoInterceptor extends BaseMethodInterceptor {
     }
 
     @Override
-    protected Object invokeProxy(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+    public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
         Query query = method.getAnnotation(Query.class);
         org.norm.anno.UpdateQuery updateQuery = method.getAnnotation(org.norm.anno.UpdateQuery.class);
         if(query != null){
@@ -36,7 +37,7 @@ public class CrudDaoInterceptor extends BaseMethodInterceptor {
         Method thisMethod = ReflectUtils.getMethodOrNull(CrudDaoImpl.class,method.getName(),method.getParameterTypes());
         if(thisMethod != null){
             //如果是dbDao中的实现方法.
-            return ReflectUtils.invoke(thisMethod,crudDao,args);
+            return ReflectUtils.invokeAndThrow(thisMethod,crudDao,args);
         }
         return proxy.invokeSuper(obj,args);
     }
@@ -84,7 +85,7 @@ public class CrudDaoInterceptor extends BaseMethodInterceptor {
         }else if(returnType == boolean.class || returnType == Boolean.class){
             return crudDao.executeUpdate(updateQuery) > 0;
         }
-        throw new BeanException("@UpdateQuery method return type should be void/int/boolean , :" + returnType.getName());
+        throw new ExecutorException("@UpdateQuery method return type should be void/int/boolean , :" + returnType.getName());
     }
 
 }

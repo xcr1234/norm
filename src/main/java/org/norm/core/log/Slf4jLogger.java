@@ -22,6 +22,7 @@ public class Slf4jLogger implements SqlLogger {
 
     @Override
     public void log(String sql) {
+        sql = sql.replaceAll("\n"," ").replaceAll("\t"," ");
         switch (level){
             case ERROR:case FATAL: //slf4j no fatal level.
                 if(logger.isErrorEnabled()){

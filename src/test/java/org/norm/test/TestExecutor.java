@@ -1,13 +1,12 @@
 package org.norm.test;
 
 import org.junit.Test;
-import org.norm.Configuration;
+import org.norm.Norm;
 import org.norm.core.executor.Executor;
 import org.norm.core.parameter.Parameter;
 import org.norm.core.handler.ResultSetHandler;
 import org.norm.core.query.SelectQuery;
 import org.norm.core.executor.DefaultExecutor;
-import org.norm.core.parameter.SimpleValueParameter;
 import org.norm.core.parameter.ValueParameter;
 import org.norm.page.Page;
 import org.norm.page.impl.H2Page;
@@ -38,11 +37,11 @@ public class TestExecutor extends BaseConnTest {
 
     @Test
     public void test() throws SQLException {
-        Configuration configuration = new Configuration();
-        configuration.setShowSql(true);
+        Norm norm = new Norm();
+        norm.setShowSql(true);
 
 
-        Executor executor = new DefaultExecutor(configuration);
+        Executor executor = new DefaultExecutor(norm);
         SelectQuery<Car> query = new SelectQuery<Car>();
         query.setSql("select * from cars");
         query.setParameters(Collections.<Parameter>emptyList());
@@ -53,11 +52,11 @@ public class TestExecutor extends BaseConnTest {
 
     @Test
     public void test2()throws SQLException{
-        Configuration configuration = new Configuration();
-        configuration.setShowSql(true);
+        Norm norm = new Norm();
+        norm.setShowSql(true);
 
 
-        Executor executor = new DefaultExecutor(configuration);
+        Executor executor = new DefaultExecutor(norm);
         SelectQuery<Car> query = new SelectQuery<Car>();
         query.setSql("select * from cars where id = ? or name like ?");
         query.setParameters(Arrays.asList(new Parameter[]{
@@ -72,15 +71,15 @@ public class TestExecutor extends BaseConnTest {
 
     @Test(expected = SQLException.class)
     public void test3()throws SQLException{
-        Configuration configuration = new Configuration();
-        configuration.setShowSql(true);
+        Norm norm = new Norm();
+        norm.setShowSql(true);
 
 
-        Executor executor = new DefaultExecutor(configuration);
+        Executor executor = new DefaultExecutor(norm);
         SelectQuery<Car> query = new SelectQuery<Car>();
         query.setSql("select * from cars where id >= ?");
         query.setParameters(Arrays.asList(new Parameter[]{
-                new SimpleValueParameter(1)
+                new ValueParameter("id",1)
         }));
         query.setResultSetHandler(carHandler);
 
@@ -95,13 +94,13 @@ public class TestExecutor extends BaseConnTest {
     //测试分页查询
     @Test
     public void test4() throws SQLException {
-        Configuration configuration = new Configuration();
-        configuration.setShowSql(true);
-        configuration.setPageSql(new H2Page());
+        Norm norm = new Norm();
+        norm.setShowSql(true);
+        norm.setPageSql(new H2Page());
 
 
 
-        Executor executor = new DefaultExecutor(configuration);
+        Executor executor = new DefaultExecutor(norm);
         SelectQuery<Car> query = new SelectQuery<Car>();
         query.setSql("select * from cars");
         query.setParameters(Collections.<Parameter>emptyList());

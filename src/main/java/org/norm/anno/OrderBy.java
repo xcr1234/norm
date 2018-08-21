@@ -11,6 +11,6 @@ public @interface OrderBy {
     Type type();
 
     enum Type{
-        DEFAULT,ASC,DESC;
+        ASC,DESC;
     }
 }

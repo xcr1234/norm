@@ -1,7 +1,8 @@
 package org.norm.core.executor;
 
 import org.norm.Configuration;
+import org.norm.Norm;
 
 public interface ExecutorFactory {
-    Executor getExecutor(Configuration configuration);
+    Executor getExecutor(Norm norm);
 }

@@ -2,6 +2,7 @@ package org.norm.core.interceptor;
 
 import org.norm.Configuration;
 import org.norm.CrudDao;
+import org.norm.Norm;
 import org.norm.core.executor.Executor;
 import org.norm.core.generator.GeneratorIds;
 import org.norm.core.generator.QueryGenerator;
@@ -10,27 +11,27 @@ import org.norm.core.query.UpdateQuery;
 import org.norm.page.Page;
 import org.norm.util.AssertUtils;
 import org.norm.util.ErrorContext;
-import org.norm.util.ExceptionUtils;
+
 
 import java.sql.Connection;
 import java.util.List;
 
 public class CrudDaoImpl implements CrudDao<Object, Object> {
 
-    private Configuration configuration;
+    private Norm norm;
     private QueryGenerator generator;
     private Executor executor;
     private Class<?> daoClass;
     private Class<?> beanClass;
 
-    public CrudDaoImpl(Configuration configuration, QueryGenerator generator) {
-        this.configuration = configuration;
+    public CrudDaoImpl(Norm norm, QueryGenerator generator) {
+        this.norm = norm;
         this.generator = generator;
-        this.executor = configuration.getExecutorFactory().getExecutor(configuration);
+        this.executor = norm.getConfiguration().getExecutorFactory().getExecutor(norm);
     }
 
     public Configuration getConfiguration() {
-        return configuration;
+        return norm.getConfiguration();
     }
 
     public QueryGenerator getGenerator() {
@@ -61,55 +62,55 @@ public class CrudDaoImpl implements CrudDao<Object, Object> {
     public int executeUpdate(UpdateQuery updateQuery){
         Connection connection = null;
         try{
-            connection = configuration.openConnection();
+            connection = norm.openConnection();
             return executor.executeUpdate(connection,updateQuery);
         }catch (Exception e){
-            throw ExceptionUtils.wrap(e);
+            throw norm.handleError(e);
         }finally {
             ErrorContext.clear();
-            configuration.releaseConnection(connection);
+            norm.releaseConnection(connection);
         }
     }
 
     public <T> T selectOne(SelectQuery<T> query){
         Connection connection = null;
         try{
-            connection = configuration.openConnection();
+            connection = norm.openConnection();
             return executor.selectOne(connection,query);
         }catch (Exception e){
-            throw ExceptionUtils.wrap(e);
+            throw norm.handleError(e);
         }finally {
             ErrorContext.clear();
-            configuration.releaseConnection(connection);
+            norm.releaseConnection(connection);
         }
     }
 
     public <T> List<T> selectList(SelectQuery<T> query){
         Connection connection = null;
         try{
-            connection = configuration.openConnection();
+            connection = norm.openConnection();
             return executor.selectList(connection,query);
         }catch (Exception e){
-            throw ExceptionUtils.wrap(e);
+            throw norm.handleError(e);
         }finally {
             ErrorContext.clear();
-            configuration.releaseConnection(connection);
+            norm.releaseConnection(connection);
         }
     }
 
     public <T> List<T> selectPage(SelectQuery<T> query,Page<T> page){
         Connection connection = null;
         try{
-            connection = configuration.openConnection();
+            connection = norm.openConnection();
             executor.processPage(connection,query,page);
             List<T> list = executor.selectList(connection,query);
             page.setRecords(list);
             return list;
         }catch (Exception e){
-            throw ExceptionUtils.wrap(e);
+            throw norm.handleError(e);
         }finally {
             ErrorContext.clear();
-            configuration.releaseConnection(connection);
+            norm.releaseConnection(connection);
         }
     }
     @Override
@@ -146,14 +147,14 @@ public class CrudDaoImpl implements CrudDao<Object, Object> {
     @Override
     public boolean exists(Object o) {
         AssertUtils.notNull(o,"exists object");
-        SelectQuery<Boolean> query = (SelectQuery<Boolean>) generator.select(GeneratorIds.EXISTS,o);
-        return selectOne(query);
+        SelectQuery<Integer> query = (SelectQuery<Integer>) generator.select(GeneratorIds.EXISTS,o);
+        return selectOne(query) != null;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public int count() {
-        SelectQuery<Integer> query = (SelectQuery<Integer>) generator.select(GeneratorIds.COUNT,null);
+    public int count(Object o) {
+        SelectQuery<Integer> query = (SelectQuery<Integer>) generator.select(GeneratorIds.COUNT,o);
         return selectOne(query);
     }
 

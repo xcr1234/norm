@@ -25,6 +25,7 @@ public class CommonsLogger implements SqlLogger{
 
     @Override
     public void log(String sql) {
+        sql = sql.replaceAll("\n"," ").replaceAll("\t"," ");
         switch (level){
             case ERROR:
                 if(logger.isErrorEnabled()){

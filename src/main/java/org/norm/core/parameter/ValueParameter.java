@@ -1,9 +1,11 @@
 package org.norm.core.parameter;
 
 import org.norm.util.ErrorContext;
+import org.norm.util.JdbcUtils;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 
 public class ValueParameter implements Parameter{
     private String property;
@@ -17,7 +19,7 @@ public class ValueParameter implements Parameter{
     @Override
     public void setParameter(PreparedStatement ps, int index) throws SQLException {
         ErrorContext.instance().addParam(value);
-        ps.setObject(index,value);
+        JdbcUtils.setParameter(ps,index,value, Types.NULL,null);
     }
 
     @Override

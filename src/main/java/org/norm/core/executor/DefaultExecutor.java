@@ -1,10 +1,11 @@
 package org.norm.core.executor;
 
-import org.norm.Configuration;
-import org.norm.core.handler.ResultSetHandler;
+import org.norm.Norm;
+import org.norm.core.handler.SingleValueResultSetHandler;
 import org.norm.core.parameter.Parameter;
 import org.norm.core.query.SelectQuery;
 import org.norm.core.query.UpdateQuery;
+import org.norm.exception.ExecutorException;
 import org.norm.page.Page;
 import org.norm.util.ErrorContext;
 
@@ -14,10 +15,10 @@ import java.util.List;
 
 public class DefaultExecutor implements Executor {
 
-    private Configuration configuration;
+    private Norm norm;
 
-    public DefaultExecutor(Configuration configuration) {
-        this.configuration = configuration;
+    public DefaultExecutor(Norm norm) {
+        this.norm = norm;
     }
 
     public int executeUpdate(Connection connection, UpdateQuery query)throws SQLException{
@@ -48,7 +49,7 @@ public class DefaultExecutor implements Executor {
             }
             T t = query.getResultSetHandler().handle(rs);
             if(rs.next()){
-                throw new SQLDataException("Executor error:selectOne() expected 0 or 1 row,but got least 2 rows.");
+                throw new ExecutorException("Executor error:selectOne() expected 0 or 1 row , but got least 2 rows.");
             }
             return t;
         }finally {
@@ -84,24 +85,24 @@ public class DefaultExecutor implements Executor {
             SelectQuery<Integer> countQuery = new SelectQuery<Integer>();
             countQuery.setSql(countSql);
             countQuery.setParameters(query.getParameters());
-            countQuery.setResultSetHandler(new ResultSetHandler<Integer>() {
-                @Override
-                public Integer handle(ResultSet resultSet) throws SQLException {
-                    return resultSet.getInt(1);
-                }
-            });
+            countQuery.setResultSetHandler(new SingleValueResultSetHandler<Integer>(Integer.class));
             int totalCount = selectOne(connection,countQuery);
             page.setTotal(totalCount);
             int pageSize = page.getPageSize();
             page.setPageCount(totalCount / pageSize + ((totalCount % pageSize == 0) ? 0 : 1));
         }
-        query.setSql(configuration.getPageSql().buildSql(page,sql));
+        query.setSql(norm.getPageSql().buildSql(page,sql));
     }
 
-    protected PreparedStatement prepareStatement(Connection connection,String sql)throws SQLException{
+
+    protected PreparedStatement prepareStatement(Connection connection, String sql)throws SQLException{
         ErrorContext errorContext = ErrorContext.instance();
-        if(configuration.isShowSql()){
-            configuration.getSqlLogger().log(sql);
+        if(norm.isShowSql()){
+            if(norm.getConfiguration().isFormatSql()){
+                norm.getSqlLogger().log(norm.getSqlFormatter().format(sql));
+            }else{
+                norm.getSqlLogger().log(sql);
+            }
         }
         errorContext.setState("prepare statement");
         errorContext.setSql(sql);

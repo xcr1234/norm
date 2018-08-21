@@ -1,12 +1,50 @@
 package org.norm.util;
 
 
+import org.norm.exception.ExecutorException;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.*;
 
 public final class JdbcUtils {
+
+    public static boolean connClosed(Connection connection){
+        try {
+            return connection == null || connection.isClosed();
+        } catch (SQLException e) {
+            return true;
+        }
+    }
+
+    public static void closeObjects(Connection connection,ResultSet rs,PreparedStatement ps){
+        if(rs != null){
+            try {
+                rs.close();
+            } catch (SQLException e) {
+
+            }
+        }
+        if(ps != null){
+            try {
+                ps.close();
+            } catch (SQLException e) {
+
+            }
+        }
+        if(connection != null){
+            try {
+                connection.close();
+            } catch (SQLException e) {
+
+            }
+        }
+    }
+
+    public static void close(Connection connection){
+        closeObjects(connection,null,null);
+    }
 
     public static void setParameter(PreparedStatement ps,int index,Object value,int nullType,Integer type) throws SQLException{
         if(value == null){
@@ -18,7 +56,7 @@ public final class JdbcUtils {
         }
     }
 
-    public static void setParameter(PreparedStatement ps, int index, Object value) throws SQLException {
+    private static void setParameter(PreparedStatement ps, int index, Object value) throws SQLException {
         if (value instanceof String) {
             ps.setString(index, (String) value);
         } else if (value instanceof Boolean) {
@@ -138,7 +176,7 @@ public final class JdbcUtils {
             }
             return clob.getCharacterStream();
         }
-        throw new SQLException("can't get object:unsupported type :"+type);
+        throw new ExecutorException("can't get object:unsupported type :"+type);
     }
 
     public static Object getObject(ResultSet resultSet, int index, Class<?> type)throws SQLException{
@@ -216,6 +254,6 @@ public final class JdbcUtils {
             }
             return clob.getCharacterStream();
         }
-        throw new SQLException("can't get object:unsupported type :"+type);
+        throw new ExecutorException("can't get object:unsupported type :"+type);
     }
 }

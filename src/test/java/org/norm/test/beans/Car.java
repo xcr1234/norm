@@ -1,8 +1,15 @@
 package org.norm.test.beans;
 
+import org.norm.anno.Column;
+import org.norm.anno.Id;
+import org.norm.anno.Table;
+
+@Table("cars")
 public class Car {
+    @Id(identity = false)
     private Integer id;
     private String name;
+    @Column("descrption")
     private String desc;
 
     public Integer getId() {

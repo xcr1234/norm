@@ -11,9 +11,9 @@ public class ReflectUtils {
         try {
             return clz.newInstance();
         } catch (InstantiationException e) {
-            throw new ReflectionException("cannot instance object for class:" + clz.getName() , e);
+            throw new ReflectionException("cannot instance object for class:" + clz.getName() + ",nested exception is :" + e , e);
         } catch (IllegalAccessException e) {
-            throw new ReflectionException("cannot instance object for class:" + clz.getName() , e);
+            throw new ReflectionException("cannot instance object for class:" + clz.getName() + ",nested exception is :" + e, e);
         }
     }
 
@@ -37,9 +37,17 @@ public class ReflectUtils {
         try {
             return method.invoke(object,args);
         } catch (IllegalAccessException e) {
-            throw new ReflectionException("cannot invoke method:" + method , e);
+            throw new ReflectionException("cannot invoke method:" + method + ",nested exception is :" + e , e);
         } catch (InvocationTargetException e) {
-            throw new ReflectionException("cannot invoke method:" + method , e.getCause());
+            throw new ReflectionException("cannot invoke method:" + method + ",nested exception is :" + e.getCause() , e.getCause());
+        }
+    }
+
+    public static Object invokeAndThrow(Method method,Object object,Object... args) throws Throwable{
+        try{
+            return method.invoke(object,args);
+        }catch (InvocationTargetException e){
+            throw e.getCause();
         }
     }
 

@@ -14,12 +14,7 @@ import org.norm.util.BeanUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public final class Meta {
 
@@ -118,6 +113,17 @@ public final class Meta {
         if(idColumn.getAnnotation(Transient.class) != null){
             throw new BeanException("id field can't be Transient :"+clazz);
         }
+
+        Collections.sort(afterInstanceMethods, new Comparator<Method>() {
+            @Override
+            public int compare(Method o1, Method o2) {
+                AfterInstance ai1 = o1.getAnnotation(AfterInstance.class);
+                AfterInstance ai2 = o2.getAnnotation(AfterInstance.class);
+                Integer order1 = ai1 == null ? 0 :ai1.order();
+                int order2 = ai2 == null ? 0 : ai2.order();
+                return order1.compareTo(order2);
+            }
+        });
 
         //check reference.
 //        for(ColumnMeta columnMeta : columnMetas.values()){

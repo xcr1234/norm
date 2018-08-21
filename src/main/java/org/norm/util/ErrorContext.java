@@ -15,7 +15,6 @@ public class ErrorContext {
     private List<Object> params;
     private String state;
     private Parameter parameter;
-    private Configuration configuration;
 
     private ErrorContext(){
 
@@ -36,13 +35,6 @@ public class ErrorContext {
         local.remove();
     }
 
-    public Configuration getConfiguration() {
-        return configuration;
-    }
-
-    public void setConfiguration(Configuration configuration) {
-        this.configuration = configuration;
-    }
 
     public String getSql() {
         return sql;

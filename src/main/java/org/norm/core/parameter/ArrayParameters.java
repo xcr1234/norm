@@ -24,8 +24,10 @@ public class ArrayParameters implements Iterable<Parameter> {
 
             @Override
             public Parameter next() {
-                Object value = args[cursor++ ];
-                return new SimpleValueParameter(value);
+                Object value = args[cursor];
+                Parameter parameter = new ValueParameter("#p" + cursor,value);
+                cursor++;
+                return parameter;
             }
 
             @Override

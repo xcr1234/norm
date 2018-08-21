@@ -59,7 +59,7 @@ public interface CrudDao <T,ID>{
      * 计算数据表中的总数
      * @return 总数量
      */
-    int count();
+    int count(Object o);
 
     /**
      * 根据id的值查询实体

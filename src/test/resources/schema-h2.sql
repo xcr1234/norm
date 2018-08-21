@@ -17,13 +17,13 @@ INSERT INTO customer VALUES ('Canon','Canon USA, Inc.','Tsuneji Uchida','One Can
 INSERT INTO customer VALUES ('Nokia','	Nokia Corporation','Olli-Pekka Kallasvuo','P.O. Box 226, FIN-00045 Nokia Group, Finland','Helsinki',	NULL ,'Finland');
 
 CREATE TABLE IF NOT EXISTS cars(
-  id INTEGER PRIMARY KEY AUTO_INCREMENT,
+  id INTEGER PRIMARY KEY,
   name VARCHAR2(20),
   descrption VARCHAR2(30)
 );
 
 DELETE FROM cars;
 
-INSERT INTO cars(name, descrption) VALUES ('兰博基尼egoista','兰博基尼概念车系列');
-INSERT INTO cars(name, descrption) VALUES ('自由光','首款9速自动变速箱');
-INSERT INTO cars(name, descrption) VALUES ('北京现代ix25','小型SUV汽车');
+INSERT INTO cars(id,name, descrption) VALUES (1,'兰博基尼egoista','兰博基尼概念车系列');
+INSERT INTO cars(id,name, descrption) VALUES (2,'自由光','首款9速自动变速箱');
+INSERT INTO cars(id,name, descrption) VALUES (3,'北京现代ix25','小型SUV汽车');
