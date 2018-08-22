@@ -585,7 +585,7 @@ public final class CrudDaoImpl implements CrudDao<Object, Object>, NormAware {
             if(pageable != null){
                 if(pageable.isEvalCount()){
                     i = 1;
-                    String countSql = "select count(1) from ( " + originSql + " )";
+                    String countSql = "select count(1) from ( " + originSql + " ) as rs_";
                     PreparedStatement countPs = null;
                     ResultSet countRs = null;
                     if(norm.isShow_sql()){

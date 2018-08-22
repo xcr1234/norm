@@ -7,7 +7,7 @@ Maven:
 <dependency>
     <groupId>io.github.xcr1234</groupId>
     <artifactId>norm</artifactId>
-    <version>1.7.1</version>
+    <version>1.7.2</version>
 </dependency>
 ```
 

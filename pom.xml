@@ -6,7 +6,7 @@
 
     <groupId>io.github.xcr1234</groupId>
     <artifactId>norm</artifactId>
-    <version>1.7.1</version>
+    <version>1.7.2</version>
     <packaging>jar</packaging>
 
     <name>norm</name>
@@ -117,7 +117,7 @@
 
             </activation>
             <build>
-                <finalName>orm</finalName>
+                <finalName>norm</finalName>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>

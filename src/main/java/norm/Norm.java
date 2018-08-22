@@ -14,7 +14,6 @@ import norm.support.mybatis.InvokeMyBatis;
 import norm.util.Args;
 import norm.util.BasicFormatterImpl;
 import norm.util.BeanUtils;
-import org.apache.ibatis.plugin.PluginException;
 
 
 import javax.sql.DataSource;
@@ -397,7 +396,7 @@ public final class Norm implements Closeable{
         }
         String db = pageSql.database();
         if(db == null){
-            throw new PluginException("the database of pagesql is null!");
+            throw new IllegalArgumentException("the database of pagesql is null!");
         }
         pageSqlMap.put(db.toLowerCase(),pageSql);
     }
