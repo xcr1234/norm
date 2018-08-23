@@ -21,7 +21,6 @@ public class CrudDaoImpl implements CrudDao<Object, Object> {
     private Norm norm;
     private QueryGenerator generator;
     private Executor executor;
-    private Class<?> daoClass;
     private Class<?> beanClass;
 
     public CrudDaoImpl(Norm norm, QueryGenerator generator) {
@@ -30,20 +29,16 @@ public class CrudDaoImpl implements CrudDao<Object, Object> {
         this.executor = norm.getConfiguration().getExecutorFactory().getExecutor(norm);
     }
 
+    public Norm getNorm() {
+        return norm;
+    }
+
     public Configuration getConfiguration() {
         return norm.getConfiguration();
     }
 
     public QueryGenerator getGenerator() {
         return generator;
-    }
-
-    public Class<?> getDaoClass() {
-        return daoClass;
-    }
-
-    public void setDaoClass(Class<?> daoClass) {
-        this.daoClass = daoClass;
     }
 
     public Class<?> getBeanClass() {

@@ -147,9 +147,6 @@ public class Configuration {
                 throw new ExecutorException("register driver failed , class not found :" + driverClass);
             }
         }
-        if(url == null){
-            throw new SQLException("the jdbc url is null!");
-        }
         Properties properties = null;
         if(connProperties != null){
             properties = new Properties(connProperties);

@@ -81,7 +81,7 @@ public class DefaultExecutor implements Executor {
     public <T> void processPage(Connection connection, SelectQuery<T> query, Page page)throws SQLException{
         String sql = query.getSql();
         if(page.isEvalCount()){
-            String countSql = "select count(1) from ( " + sql + " )";
+            String countSql = "select count(1) from ( " + sql + " ) as count_"; //as count_ : fix mysql exception
             SelectQuery<Integer> countQuery = new SelectQuery<Integer>();
             countQuery.setSql(countSql);
             countQuery.setParameters(query.getParameters());

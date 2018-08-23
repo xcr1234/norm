@@ -27,12 +27,15 @@ public class CrudDaoInterceptor implements MethodInterceptor {
 
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+        if("getNorm".equals(method.getName()) && method.getParameterTypes().length == 0){
+            return crudDao.getNorm();
+        }
         Query query = method.getAnnotation(Query.class);
         org.norm.anno.UpdateQuery updateQuery = method.getAnnotation(org.norm.anno.UpdateQuery.class);
         if(query != null){
-            return handleQuery(query, method, args);
+            return handleQuery(query.sql(), method.getReturnType(), args);
         }else if(updateQuery != null){
-            return handleUpdateQuery(updateQuery,method,args);
+            return handleUpdateQuery(updateQuery.sql(),method.getReturnType(),args);
         }
         Method thisMethod = ReflectUtils.getMethodOrNull(CrudDaoImpl.class,method.getName(),method.getParameterTypes());
         if(thisMethod != null){
@@ -43,7 +46,7 @@ public class CrudDaoInterceptor implements MethodInterceptor {
     }
 
     @SuppressWarnings("unchecked")
-    private Object handleQuery(Query anno, final Method thisMethod, Object[] args){
+    public Object handleQuery(String sql, final Class<?> returnType, Object[] args){
         Page page = null;
         Object[] params = null;
         if(args.length > 0 && args[args.length-1] instanceof Page){
@@ -55,9 +58,8 @@ public class CrudDaoInterceptor implements MethodInterceptor {
             params = args;
         }
         SelectQuery selectQuery = new SelectQuery<Object>();
-        selectQuery.setSql(anno.sql());
+        selectQuery.setSql(sql);
         selectQuery.setParameters(new ArrayParameters(params));
-        final Class<?> returnType = thisMethod.getReturnType();
         if(returnType == List.class ){
             selectQuery.setResultSetHandler(crudDao.getGenerator().getResultSetHandler());
             if(page == null){
@@ -73,10 +75,9 @@ public class CrudDaoInterceptor implements MethodInterceptor {
         return crudDao.selectOne(selectQuery);
     }
 
-    private Object handleUpdateQuery(org.norm.anno.UpdateQuery anno,final Method thisMethod, Object[] args){
-        Class returnType = thisMethod.getReturnType();
+    public Object handleUpdateQuery(String sql,final Class returnType, Object[] args){
         UpdateQuery updateQuery = new UpdateQuery();
-        updateQuery.setSql(anno.sql());
+        updateQuery.setSql(sql);
         updateQuery.setParameters(new ArrayParameters(args));
         if(returnType == Void.class || returnType == void.class){
             crudDao.executeUpdate(updateQuery);

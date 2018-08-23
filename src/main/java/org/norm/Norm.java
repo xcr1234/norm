@@ -60,10 +60,10 @@ public class Norm {
         configuration.setColumnNameStrategy(columnNameStrategy);
     }
 
+
     public boolean isShowSql() {
         return configuration.isShowSql();
     }
-
     public void setShowSql(boolean showSql) {
         configuration.setShowSql(showSql);
     }
@@ -175,7 +175,7 @@ public class Norm {
                 connection.rollback();
                 return ExceptionUtils.wrap("rollback success.", e);
             } catch (SQLException e1) {
-                return ExceptionUtils.wrap("rollback save point failed :" + e1, e);
+                return ExceptionUtils.wrap("rollback failed :" + e1, e);
             }
         }
         return ExceptionUtils.wrap(e);
@@ -201,8 +201,9 @@ public class Norm {
 
     public void close(){
         TransactionManager manager = managerThreadLocal.get();
-        Connection connection = manager.getConnection();
         manager.setConnection(null);
+        manager.setBegin(false);
+        Connection connection = manager.getConnection();
         JdbcUtils.close(connection);
     }
 
@@ -225,6 +226,7 @@ public class Norm {
 
     public void rollback() {
         TransactionManager transactionManager = managerThreadLocal.get();
+        transactionManager.setBegin(false);
         Connection connection = transactionManager.getConnection();
         if(!JdbcUtils.connClosed(connection)){
             try {
@@ -233,7 +235,7 @@ public class Norm {
                 throw ExceptionUtils.wrap(e);
             }
         }
-        transactionManager.setBegin(false);
+
     }
 
     /**
@@ -241,7 +243,11 @@ public class Norm {
      * @return the current connection
      */
     public Connection getCurrentConnection(){
-        return managerThreadLocal.get().getConnection();
+        return getCurrentTransactionManager().getConnection();
+    }
+
+    public TransactionManager getCurrentTransactionManager(){
+        return managerThreadLocal.get();
     }
 
     @SuppressWarnings("unchecked")
@@ -265,9 +271,6 @@ public class Norm {
                         if (dao == null) {
                             try {
                                 dao = createDao(daoClass, (Class<T>) t0, (Class<I>) t1);
-                                if(dao instanceof NormAware){
-                                    ((NormAware) dao).setNorm(this);
-                                }
                                 daoCache.put(daoClass, dao);
                             } catch (ClassCastException e) {
                                 throw new IllegalArgumentException("illegal dao:" + daoClass);
@@ -292,13 +295,21 @@ public class Norm {
             throw new IllegalArgumentException("illegal bean,id type mismatch :" + tClass + ",dao:" + daoClass);
         }
         CrudDaoImpl crudDao = new CrudDaoImpl(this, generatorFactory.getGenerator(tClass));
-        crudDao.setDaoClass(daoClass);
         crudDao.setBeanClass(tClass);
         Enhancer enhancer = new Enhancer();
-        enhancer.setInterfaces(new Class[]{daoClass});
+        enhancer.setInterfaces(new Class[]{daoClass,NormAware.class});
         enhancer.setCallbacks(new Callback[]{new CrudDaoInterceptor(crudDao), NoOp.INSTANCE});
         enhancer.setCallbackFilter(MethodFilter.getInstance());
         return (Dao) enhancer.create();
+    }
+
+    public CrudDaoImpl createDaoForType(Class daoType){
+        Type [] types = daoType.getGenericInterfaces();
+        ParameterizedType parameterizedType = (ParameterizedType) types[0];
+        Class beanClass = (Class) parameterizedType.getActualTypeArguments()[0];
+        CrudDaoImpl crudDao = new CrudDaoImpl(this, generatorFactory.getGenerator(beanClass));
+        crudDao.setBeanClass(beanClass);
+        return crudDao;
     }
 
 }
