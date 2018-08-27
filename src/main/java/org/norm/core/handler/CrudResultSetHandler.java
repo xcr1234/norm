@@ -33,27 +33,29 @@ public class CrudResultSetHandler implements ResultSetHandler {
         Object object = ReflectUtils.newInstance(meta.getClazz());
 
         for(ColumnMeta columnMeta : meta.getColumnMetas().values()){
-            boolean setFlag = false;
-            Object value = null;
-            String columnName = columnMeta.getColumnName();
-            TypeConverter<?> converter = columnMeta.getTypeConverter();
-            if(columns.contains(columnName)){
-                setFlag = true;
-                if(converter != null){
-                    value = converter.getObject(resultSet,columnName);
-                }else{
-                    value = JdbcUtils.getObject(resultSet,columnName,columnMeta.getType());
+            if(columnMeta.select()){
+                boolean setFlag = false;
+                Object value = null;
+                String columnName = columnMeta.getColumnName();
+                TypeConverter<?> converter = columnMeta.getTypeConverter();
+                if(columns.contains(columnName)){
+                    setFlag = true;
+                    if(converter != null){
+                        value = converter.getObject(resultSet,columnName);
+                    }else{
+                        value = JdbcUtils.getObject(resultSet,columnName,columnMeta.getType());
+                    }
+                }else if(columns.contains(columnName.toUpperCase())){
+                    setFlag = true;
+                    if(converter != null){
+                        value = converter.getObject(resultSet,columnName.toUpperCase());
+                    }else{
+                        value = JdbcUtils.getObject(resultSet,columnName.toUpperCase(),columnMeta.getType());
+                    }
                 }
-            }else if(columns.contains(columnName.toUpperCase())){
-                setFlag = true;
-                if(converter != null){
-                    value = converter.getObject(resultSet,columnName.toUpperCase());
-                }else{
-                    value = JdbcUtils.getObject(resultSet,columnName.toUpperCase(),columnMeta.getType());
+                if(setFlag){
+                    columnMeta.set(object,value);
                 }
-            }
-            if(setFlag){
-                columnMeta.set(object,value);
             }
         }
 

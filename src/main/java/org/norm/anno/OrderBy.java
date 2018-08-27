@@ -8,7 +8,7 @@ import java.lang.annotation.*;
 public @interface OrderBy {
     String value();
 
-    Type type();
+    Type type() default Type.DESC;
 
     enum Type{
         ASC,DESC;
