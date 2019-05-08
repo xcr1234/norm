@@ -1,13 +1,13 @@
 # Norm - 一个Java的ORM框架
 
-**已更新至版本1.7，欢迎使用**
+**已更新至版本1.7，欢迎使用（已在公司内项目应用）**
 
 Maven:
 ```xml
 <dependency>
     <groupId>io.github.xcr1234</groupId>
     <artifactId>norm</artifactId>
-    <version>1.7.1</version>
+    <version>1.7.2</version>
 </dependency>
 ```
 
