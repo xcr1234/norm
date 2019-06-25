@@ -157,6 +157,7 @@ public class Norm {
         TransactionManager manager = managerThreadLocal.get();
         Connection connection = manager.getConnection();
         if(JdbcUtils.connClosed(connection)){
+            ErrorContext.instance().setState("open connection");
             connection = configuration.newConnection();
             manager.setConnection(connection);
             if(manager.isBegin()){
@@ -171,6 +172,7 @@ public class Norm {
         Connection connection = transactionManager.getConnection();
         if (!JdbcUtils.connClosed(connection) && transactionManager.isBegin()) {
             transactionManager.setBegin(false);
+            ErrorContext.instance().setState("rollback transaction");
             try {
                 connection.rollback();
                 return ExceptionUtils.wrap("rollback success.", e);
@@ -214,6 +216,7 @@ public class Norm {
         Connection connection = transactionManager.getConnection();
         transactionManager.setBegin(false);
         if(!JdbcUtils.connClosed(connection)){
+            ErrorContext.instance().setState("commit transaction");
             try {
                 connection.commit();
             } catch (SQLException e) {
@@ -229,6 +232,7 @@ public class Norm {
         transactionManager.setBegin(false);
         Connection connection = transactionManager.getConnection();
         if(!JdbcUtils.connClosed(connection)){
+            ErrorContext.instance().setState("rollback transaction");
             try {
                 connection.rollback();
             } catch (SQLException e) {

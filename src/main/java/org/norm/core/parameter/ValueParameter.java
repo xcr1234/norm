@@ -23,7 +23,7 @@ public class ValueParameter implements Parameter{
     }
 
     @Override
-    public String getErrInfo() {
+    public String getName() {
         return property;
     }
 }

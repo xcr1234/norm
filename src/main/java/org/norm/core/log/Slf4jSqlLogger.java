@@ -3,12 +3,16 @@ package org.norm.core.log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Slf4jLogger implements SqlLogger {
+public class Slf4jSqlLogger implements SqlLogger {
 
-    private static Logger logger = LoggerFactory.getLogger(Slf4jLogger.class);
+    private static Logger logger = LoggerFactory.getLogger(Slf4jSqlLogger.class);
     private DefaultSqlLogger.Level level;
 
-    public Slf4jLogger(DefaultSqlLogger.Level level) {
+    public Slf4jSqlLogger(){
+        this(DefaultSqlLogger.getDefaultLevel());
+    }
+
+    public Slf4jSqlLogger(DefaultSqlLogger.Level level) {
         this.level = level;
     }
 

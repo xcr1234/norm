@@ -21,6 +21,7 @@ public class DefaultExecutor implements Executor {
         this.norm = norm;
     }
 
+    @Override
     public int executeUpdate(Connection connection, UpdateQuery query)throws SQLException{
         ErrorContext errorContext = ErrorContext.instance();
         PreparedStatement ps = null;
@@ -34,7 +35,8 @@ public class DefaultExecutor implements Executor {
         }
     }
 
-    public <T> T selectOne(Connection connection,SelectQuery<T> query) throws SQLException{
+    @Override
+    public <T> T selectOne(Connection connection, SelectQuery<T> query) throws SQLException{
         ErrorContext errorContext = ErrorContext.instance();
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -57,7 +59,8 @@ public class DefaultExecutor implements Executor {
         }
     }
 
-    public <T> List<T> selectList(Connection connection,SelectQuery<T> query) throws SQLException{
+    @Override
+    public <T> List<T> selectList(Connection connection, SelectQuery<T> query) throws SQLException{
         ErrorContext errorContext = ErrorContext.instance();
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -78,18 +81,33 @@ public class DefaultExecutor implements Executor {
         }
     }
 
+    protected String countSql(String sql){
+        // fix mysql exception
+        return "select count(1) from ( " + sql + " ) count_";
+    }
+
+    @Override
     public <T> void processPage(Connection connection, SelectQuery<T> query, Page page)throws SQLException{
         String sql = query.getSql();
         if(page.isEvalCount()){
-            String countSql = "select count(1) from ( " + sql + " ) as count_"; //as count_ : fix mysql exception
-            SelectQuery<Integer> countQuery = new SelectQuery<Integer>();
-            countQuery.setSql(countSql);
-            countQuery.setParameters(query.getParameters());
-            countQuery.setResultSetHandler(new SingleValueResultSetHandler<Integer>(Integer.class));
-            int totalCount = selectOne(connection,countQuery);
-            page.setTotal(totalCount);
-            int pageSize = page.getPageSize();
-            page.setPageCount(totalCount / pageSize + ((totalCount % pageSize == 0) ? 0 : 1));
+            try{
+                String countSql = countSql(sql);
+                SelectQuery<Integer> countQuery = new SelectQuery<Integer>();
+                countQuery.setSql(countSql);
+                countQuery.setParameters(query.getParameters());
+                countQuery.setResultSetHandler(new SingleValueResultSetHandler<Integer>(Integer.class));
+                int totalCount = selectOne(connection,countQuery);
+                page.setTotal(totalCount);
+                int pageSize = page.getPageSize();
+                page.setPageCount(totalCount / pageSize + ((totalCount % pageSize == 0) ? 0 : 1));
+            }catch (SQLException e){
+                //当抛出异常时，更改ErrorContext的state
+                ErrorContext.instance().setState("page eval count");
+                throw e;
+            }catch (RuntimeException ex){
+                ErrorContext.instance().setState("page eval count");
+                throw ex;
+            }
         }
         query.setSql(norm.getPageSql().buildSql(page,sql));
     }

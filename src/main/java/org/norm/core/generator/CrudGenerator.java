@@ -1,6 +1,7 @@
 package org.norm.core.generator;
 
 import org.norm.Norm;
+import org.norm.QueryWrapper;
 import org.norm.anno.Id;
 import org.norm.anno.OrderBy;
 import org.norm.core.handler.CrudResultSetHandler;
@@ -8,6 +9,7 @@ import org.norm.core.handler.ResultSetHandler;
 import org.norm.core.handler.SingleValueResultSetHandler;
 import org.norm.core.meta.ColumnMeta;
 import org.norm.core.meta.Meta;
+import org.norm.core.parameter.ArrayParameters;
 import org.norm.core.parameter.ColumnPropertyParameter;
 import org.norm.core.parameter.ColumnValueParameter;
 import org.norm.core.parameter.Parameter;
@@ -239,6 +241,18 @@ public class CrudGenerator implements QueryGenerator{
         query.setSql(query().toString());
         query.setResultSetHandler(resultSetHandler);
         query.setParameters(Collections.<Parameter>emptyList());
+        return query;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public SelectQuery<?> findAllQuery(QueryWrapper queryWrapper) {
+        SelectQuery<?> query = new SelectQuery<Object>();
+        SQL sql = query();
+        queryWrapper.eval(sql);
+        query.setSql(sql.toString());
+        query.setResultSetHandler(resultSetHandler);
+        query.setParameters(new ArrayParameters(queryWrapper.getParameters().toArray()));
         return query;
     }
 

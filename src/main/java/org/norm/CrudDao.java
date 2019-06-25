@@ -96,4 +96,19 @@ public interface CrudDao <T,ID>{
      */
     List<T> findAll(T t, Page<T> page);
 
+    /**
+     * 返回所有的实体List，通过条件查询，参数做为查询条件，返回值其实是一个{@link java.util.ArrayList}
+     * @param queryWrapper 查询条件
+     * @param page
+     * @return
+     */
+    List<T> findAll(QueryWrapper queryWrapper, Page<T> page);
+
+    /**
+     * 返回所有的实体List，通过条件查询，参数做为查询条件，返回值其实是一个{@link java.util.ArrayList}
+     * @param queryWrapper 查询条件
+     * @return
+     */
+    List<T> findAll(QueryWrapper queryWrapper);
+
 }

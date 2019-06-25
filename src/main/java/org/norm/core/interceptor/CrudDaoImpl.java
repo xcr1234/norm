@@ -3,6 +3,7 @@ package org.norm.core.interceptor;
 import org.norm.Configuration;
 import org.norm.CrudDao;
 import org.norm.Norm;
+import org.norm.QueryWrapper;
 import org.norm.core.executor.Executor;
 import org.norm.core.generator.GeneratorIds;
 import org.norm.core.generator.QueryGenerator;
@@ -179,6 +180,20 @@ public class CrudDaoImpl implements CrudDao<Object, Object> {
     @SuppressWarnings("unchecked")
     public List<Object> findAll(Object o) {
         SelectQuery<Object> query = (SelectQuery<Object>) generator.select(GeneratorIds.FIND_ALL,o);
+        return selectList(query);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<Object> findAll(QueryWrapper queryWrapper, Page<Object> page) {
+        SelectQuery<Object> query = (SelectQuery<Object>) generator.findAllQuery(queryWrapper);
+        return selectPage(query,page);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<Object> findAll(QueryWrapper queryWrapper) {
+        SelectQuery<Object> query = (SelectQuery<Object>) generator.findAllQuery(queryWrapper);
         return selectList(query);
     }
 

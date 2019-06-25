@@ -1,22 +1,13 @@
 package org.norm.support.mybatis;
 
 import net.sf.cglib.proxy.Enhancer;
-import org.mybatis.spring.mapper.MapperFactoryBean;
 import org.norm.CrudDao;
 import org.norm.Norm;
 import org.norm.NormAware;
+import org.mybatis.spring.mapper.MapperFactoryBean;
 import org.norm.core.interceptor.CrudDaoImpl;
 
-public class NormMapperFactoryBean<T> extends MapperFactoryBean<T> {
-
-
-    public NormMapperFactoryBean() {
-    }
-
-    public NormMapperFactoryBean(Class<T> mapperInterface) {
-        super(mapperInterface);
-    }
-
+public class MyMapperFactoryBean<T> extends MapperFactoryBean<T> {
 
     private Norm norm;
 
@@ -28,19 +19,25 @@ public class NormMapperFactoryBean<T> extends MapperFactoryBean<T> {
         this.norm = norm;
     }
 
+    public MyMapperFactoryBean() {
+    }
+
+    public MyMapperFactoryBean(Class<T> mapperInterface) {
+        super(mapperInterface);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public T getObject() throws Exception {
-        T t = super.getObject();
+        T object = super.getObject();
         Class mapperInterface = this.getMapperInterface();
         if(!CrudDao.class.isAssignableFrom(mapperInterface)){
-            return t;
+            return object;
         }
         CrudDaoImpl dao = norm.createDaoForType(mapperInterface);
         Enhancer enhancer = new Enhancer();
-        enhancer.setInterfaces(new Class[]{mapperInterface,MapperAware.class,NormAware.class});
-        enhancer.setCallback(new MyBatisMapperSupport(t,dao));
+        enhancer.setInterfaces(new Class[]{mapperInterface, NormAware.class,MyBatisMapperAware.class});
+        enhancer.setCallback(new MyBatisDaoSupport(object,dao));
         return (T) enhancer.create();
     }
 }
-

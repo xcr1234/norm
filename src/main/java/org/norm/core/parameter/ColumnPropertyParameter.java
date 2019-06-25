@@ -32,7 +32,7 @@ public class ColumnPropertyParameter implements Parameter {
     }
 
     @Override
-    public String getErrInfo() {
+    public String getName() {
         return columnMeta.getName();
     }
 }

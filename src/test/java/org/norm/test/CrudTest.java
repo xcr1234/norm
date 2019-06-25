@@ -5,6 +5,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.norm.Norm;
+import org.norm.QueryWrapper;
 import org.norm.core.log.SysOutLogger;
 import org.norm.exception.QueryException;
 import org.norm.page.Page;
@@ -19,7 +20,7 @@ import javax.sql.DataSource;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations={"classpath:/spring-executor.xml"})
+@ContextConfiguration(locations = {"classpath:/spring-executor.xml"})
 public class CrudTest extends BaseConnTest {
 
 
@@ -28,12 +29,11 @@ public class CrudTest extends BaseConnTest {
     private static Norm norm;
 
     @BeforeClass
-    public static void initNorm(){
+    public static void initNorm() {
         norm = new Norm();
 
         norm.setShowSql(true);
         norm.setPageSql(new H2Page());
-        norm.setSqlLogger(new SysOutLogger());
     }
 
     @Autowired
@@ -42,28 +42,28 @@ public class CrudTest extends BaseConnTest {
     }
 
     @Before
-    public void init(){
+    public void init() {
 
         carDao = norm.createDao(CarDao.class);
     }
 
 
     @Test
-    public void test1(){
+    public void test1() {
         List<Car> list = carDao.findAll();
         System.out.println(list);
     }
 
 
     @Test
-    public void test2(){
+    public void test2() {
         Car car = carDao.findOne(1);
         System.out.println(car);
     }
 
 
     @Test
-    public void testSave()  {
+    public void testSave() {
 
         //h2内存数据库 插入后需要在事务中查询
         norm.begin();
@@ -82,7 +82,7 @@ public class CrudTest extends BaseConnTest {
 
 
     @Test
-    public void testdeleteByID(){
+    public void testdeleteByID() {
 
         norm.begin();
 
@@ -103,26 +103,25 @@ public class CrudTest extends BaseConnTest {
 
 
     @Test
-    public void testDelete(){
+    public void testDelete() {
         norm.begin();
 
         int rows = carDao.deleteAll();
 
-        System.out.println("delete :" +rows);
+        System.out.println("delete :" + rows);
 
-        System.out.println("list=" +carDao.findAll());
+        System.out.println("list=" + carDao.findAll());
 
         norm.rollback();
 
-        System.out.println("list=" +carDao.findAll());
+        System.out.println("list=" + carDao.findAll());
 
         norm.commit();
     }
 
 
-
     @Test
-    public void testUpdate(){
+    public void testUpdate() {
         norm.begin();
 
         Car car = carDao.findOne(2);
@@ -139,25 +138,25 @@ public class CrudTest extends BaseConnTest {
     }
 
     @Test
-    public void testExists(){
+    public void testExists() {
         System.out.println(carDao.exists(1));
         System.out.println(carDao.exists(5));
     }
 
 
     @Test
-    public void testCount(){
+    public void testCount() {
         System.out.println(carDao.count(null));
     }
 
     @Test
-    public void testFineOne(){
+    public void testFineOne() {
         System.out.println(carDao.findOne(3));
     }
 
     @Test
-    public void testPage(){
-        Page<Car> page = new Page<Car>(1,2);
+    public void testPage() {
+        Page<Car> page = new Page<Car>(1, 2);
         List<Car> list = carDao.findAll(page);
 
         System.out.println(list);
@@ -166,18 +165,32 @@ public class CrudTest extends BaseConnTest {
     }
 
     @Test(expected = QueryException.class)
-    public void testError(){
-        try{
+    public void testError() {
+        try {
             carDao.query(1);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             e.printStackTrace();
             throw e;
         }
     }
 
     @Test(expected = NoSuchMethodError.class)
-    public void testError2(){
+    public void testError2() {
         carDao.query2();
+    }
+
+    @Test
+    public void testQuery() {
+        QueryWrapper queryWrapper = new QueryWrapper();
+        queryWrapper.condition("id", ">", 2)
+                .orderBy("id asc");
+        List<Car> cars = carDao.findAll(queryWrapper);
+        System.out.println(cars);
+
+        queryWrapper = new QueryWrapper();
+        queryWrapper.like("descrption", "SUV");
+        cars = carDao.findAll(queryWrapper);
+        System.out.println(cars);
     }
 
 }

@@ -4,9 +4,9 @@ package org.norm.core.log;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class CommonsLogger implements SqlLogger{
+public class CommonsSqlLogger implements SqlLogger{
 
-    private static Log logger = LogFactory.getLog(CommonsLogger.class);
+    private static Log logger = LogFactory.getLog(CommonsSqlLogger.class);
 
     private DefaultSqlLogger.Level level;
 
@@ -19,7 +19,11 @@ public class CommonsLogger implements SqlLogger{
     }
 
 
-    public CommonsLogger(DefaultSqlLogger.Level level) {
+    public CommonsSqlLogger(){
+        this(DefaultSqlLogger.getDefaultLevel());
+    }
+
+    public CommonsSqlLogger(DefaultSqlLogger.Level level) {
         this.level = level;
     }
 

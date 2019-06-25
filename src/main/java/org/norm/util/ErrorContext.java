@@ -37,6 +37,9 @@ public class ErrorContext {
 
 
     public String getSql() {
+        if(sql != null){
+            return sql.replace("\n"," ").replace("\r"," ").replace("\t"," ");
+        }
         return sql;
     }
 

@@ -22,7 +22,7 @@ public class ExceptionUtils {
         showParameters(sb,errorContext.getParams());
         sb.append('\n');
         if(errorContext.getParameter() != null){
-            sb.append("current parameter:").append(errorContext.getParameter().getErrInfo()).append('\n');
+            sb.append("current parameter:").append(errorContext.getParameter().getName()).append('\n');
         }
         return new QueryException(sb.toString(),cause);
     }
@@ -41,7 +41,7 @@ public class ExceptionUtils {
         showParameters(sb,errorContext.getParams());
         sb.append('\n');
         if(errorContext.getParameter() != null){
-            sb.append("current parameter:").append(errorContext.getParameter().getErrInfo()).append('\n');
+            sb.append("current parameter:").append(errorContext.getParameter().getName()).append('\n');
         }
         sb.append("transaction status:").append(transInfo).append('\n');
         return new QueryException(sb.toString(),cause);
