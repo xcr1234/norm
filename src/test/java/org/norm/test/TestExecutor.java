@@ -8,6 +8,8 @@ import org.norm.core.handler.ResultSetHandler;
 import org.norm.core.query.SelectQuery;
 import org.norm.core.executor.DefaultExecutor;
 import org.norm.core.parameter.ValueParameter;
+import org.norm.exception.ExecutorException;
+import org.norm.exception.QueryException;
 import org.norm.page.Page;
 import org.norm.page.impl.H2Page;
 import org.norm.test.beans.Car;
@@ -69,7 +71,7 @@ public class TestExecutor extends BaseConnTest {
         System.out.println(list);
     }
 
-    @Test(expected = SQLException.class)
+    @Test(expected = ExecutorException.class)
     public void test3()throws SQLException{
         Norm norm = new Norm();
         norm.setShowSql(true);
