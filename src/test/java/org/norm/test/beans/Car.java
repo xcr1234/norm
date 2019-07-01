@@ -1,8 +1,8 @@
 package org.norm.test.beans;
 
-import org.norm.anno.Column;
-import org.norm.anno.Id;
-import org.norm.anno.Table;
+import norm.anno.Column;
+import norm.anno.Id;
+import norm.anno.Table;
 
 @Table("cars")
 public class Car {

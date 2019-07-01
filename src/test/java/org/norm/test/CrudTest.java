@@ -4,12 +4,11 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.norm.Norm;
-import org.norm.QueryWrapper;
-import org.norm.core.log.SysOutLogger;
-import org.norm.exception.QueryException;
-import org.norm.page.Page;
-import org.norm.page.impl.H2Page;
+import norm.Norm;
+import norm.QueryWrapper;
+import norm.exception.QueryException;
+import norm.page.Page;
+import norm.page.impl.H2Page;
 import org.norm.test.beans.Car;
 import org.norm.test.dao.CarDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -182,7 +181,7 @@ public class CrudTest extends BaseConnTest {
     @Test
     public void testQuery() {
         QueryWrapper queryWrapper = new QueryWrapper();
-        queryWrapper.condition("id", ">", 2)
+        queryWrapper.condition( "id", ">", 2)
                 .orderBy("id asc");
         List<Car> cars = carDao.findAll(queryWrapper);
         System.out.println(cars);

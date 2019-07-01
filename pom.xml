@@ -206,7 +206,7 @@
                             </execution>
                         </executions>
                     </plugin>
-                   <!-- <plugin>
+                   <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
                         <version>1.6.3</version>
@@ -232,8 +232,7 @@
                         <configuration>
                             <executable>C:\Program Files (x86)\GNU\GnuPG\gpg2</executable>
                         </configuration>
-                    </plugin>-->
-
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -242,9 +241,14 @@
 
     <distributionManagement>
         <repository>
-            <id>maven-releases</id>
-            <url>http://spr.foresealife.com/repository/maven-releases</url>
+            <id>nexus</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
         </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+
     </distributionManagement>
 
 </project>

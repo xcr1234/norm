@@ -1,7 +1,7 @@
 package org.norm.test.dao;
 
-import org.norm.CrudDao;
-import org.norm.anno.Query;
+import norm.CrudDao;
+import norm.anno.Query;
 import org.norm.test.beans.Car;
 
 public interface CarDao extends CrudDao<Car,Integer> {
