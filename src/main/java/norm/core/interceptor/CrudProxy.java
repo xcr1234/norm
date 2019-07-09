@@ -7,6 +7,8 @@ import norm.core.query.SelectQuery;
 import norm.core.query.UpdateQuery;
 import norm.page.Page;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 public interface CrudProxy extends CrudDao<Object, Object> {
@@ -23,5 +25,5 @@ public interface CrudProxy extends CrudDao<Object, Object> {
 
     <T> List<T> selectPage(SelectQuery<T> query, Page<T> page);
 
-
+    Connection openConnection() throws SQLException;
 }
