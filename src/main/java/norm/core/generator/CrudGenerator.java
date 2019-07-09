@@ -271,9 +271,13 @@ public class CrudGenerator implements QueryGenerator{
         return query;
     }
 
+    @Override
+    public Class<?> getBeanClass() {
+        return beanClass;
+    }
+
     @SuppressWarnings("unchecked")
     protected SelectQuery<?> findAllFilterGenerator(final Object object){
-        SelectQueryMiddle<Object> query = new SelectQueryMiddle<Object>();
         final List<Parameter> parameters = new ArrayList<Parameter>();
         SQL sql = query();
         for(ColumnMeta column : meta.getColumnMetas().values()){
@@ -285,7 +289,7 @@ public class CrudGenerator implements QueryGenerator{
                 }
             }
         }
-        query.setSqlBuilder(sql);
+        SelectQueryMiddle<Object> query = new SelectQueryMiddle<Object>(sql);
         query.setParameters(parameters);
         query.setResultSetHandler(resultSetHandler);
         return query;

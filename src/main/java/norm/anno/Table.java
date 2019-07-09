@@ -1,5 +1,7 @@
 package norm.anno;
 
+import norm.naming.NameStrategy;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -20,4 +22,8 @@ public @interface Table {
     String value() default "";
 
     String schema() default "";
+
+    Class<? extends NameStrategy> tableNameStrategy() default NameStrategy.class;
+
+    Class<? extends NameStrategy> columnNameStrategy() default NameStrategy.class;
 }

@@ -10,4 +10,5 @@ public interface QueryGenerator {
     UpdateQuery update(String id, Object object);
     ResultSetHandler<?> getResultSetHandler();
     SelectQuery<?> findAllQuery(QueryWrapper queryWrapper);
+    Class<?> getBeanClass();
 }

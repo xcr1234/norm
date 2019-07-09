@@ -6,6 +6,7 @@ import norm.util.sql.SQL;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -53,9 +54,12 @@ public class QueryWrapper implements Serializable {
         this.null2IsNull = null2IsNull;
     }
 
-    public QueryWrapper where(String condition){
+    public QueryWrapper where(String condition,Object ... params){
         operations.add(OP_WHERE);
         operationParameters.add(condition);
+        if(params != null && params.length > 0){
+            parameters.addAll(Arrays.asList(params));
+        }
         return this;
     }
 
@@ -111,7 +115,7 @@ public class QueryWrapper implements Serializable {
 
     public QueryWrapper between(String key, Object value1, Object value2) {
         AssertUtils.notNull(key, "the key");
-        where("between ? and ?");
+        where(key + " between ? and ?");
         parameters.add(value1);
         parameters.add(value2);
         return this;
@@ -119,7 +123,7 @@ public class QueryWrapper implements Serializable {
 
     public QueryWrapper notBetween(String key, Object value1, Object value2) {
         AssertUtils.notNull(key, "the key");
-        where("not between ? and ?");
+        where(key + " not between ? and ?");
         parameters.add(value1);
         parameters.add(value2);
         return this;

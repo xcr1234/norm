@@ -16,18 +16,18 @@ import java.util.List;
 
 public class CrudDaoInterceptor implements MethodInterceptor {
 
-    private CrudDaoImpl crudDao;
+    private CrudProxy crudProxy;
     private Class<?> beanClass;
 
-    public CrudDaoInterceptor(CrudDaoImpl crudDao) {
-        this.crudDao = crudDao;
-        this.beanClass = crudDao.getBeanClass();
+    public CrudDaoInterceptor(CrudProxy crudProxy) {
+        this.crudProxy = crudProxy;
+        this.beanClass = crudProxy.getGenerator().getBeanClass();
     }
 
     @Override
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
         if("getNorm".equals(method.getName()) && method.getParameterTypes().length == 0){
-            return crudDao.getNorm();
+            return crudProxy.getNorm();
         }
         Query query = method.getAnnotation(Query.class);
         norm.anno.UpdateQuery updateQuery = method.getAnnotation(norm.anno.UpdateQuery.class);
@@ -36,10 +36,10 @@ public class CrudDaoInterceptor implements MethodInterceptor {
         }else if(updateQuery != null){
             return handleUpdateQuery(updateQuery.sql(),method.getReturnType(),args);
         }
-        Method thisMethod = ReflectUtils.getMethodOrNull(CrudDaoImpl.class,method.getName(),method.getParameterTypes());
+        Method thisMethod = ReflectUtils.getMethodOrNull(CrudProxyImpl.class,method.getName(),method.getParameterTypes());
         if(thisMethod != null){
             //如果是dbDao中的实现方法.
-            return ReflectUtils.invokeAndThrow(thisMethod,crudDao,args);
+            return ReflectUtils.invokes(thisMethod,crudProxy,args);
         }
         return proxy.invokeSuper(obj,args);
     }
@@ -58,32 +58,32 @@ public class CrudDaoInterceptor implements MethodInterceptor {
         }
         SelectQuery selectQuery = new SelectQuery<Object>();
         selectQuery.setSql(sql);
-        selectQuery.setParameters(new ArrayParameters(params,crudDao.getConfiguration().getJdbcNullType()));
+        selectQuery.setParameters(new ArrayParameters(params,crudProxy.getNorm().getJdbcNullType()));
         if(returnType == List.class ){
-            selectQuery.setResultSetHandler(crudDao.getGenerator().getResultSetHandler());
+            selectQuery.setResultSetHandler(crudProxy.getGenerator().getResultSetHandler());
             if(page == null){
-                return crudDao.selectList(selectQuery);
+                return crudProxy.selectList(selectQuery);
             }else{
-                return crudDao.selectPage(selectQuery,page);
+                return crudProxy.selectPage(selectQuery,page);
             }
         }else if(returnType ==  beanClass){
-            selectQuery.setResultSetHandler(crudDao.getGenerator().getResultSetHandler());
+            selectQuery.setResultSetHandler(crudProxy.getGenerator().getResultSetHandler());
         }else{
             selectQuery.setResultSetHandler(new SingleValueResultSetHandler(returnType));
         }
-        return crudDao.selectOne(selectQuery);
+        return crudProxy.selectOne(selectQuery);
     }
 
     public Object handleUpdateQuery(String sql,final Class returnType, Object[] args){
         UpdateQuery updateQuery = new UpdateQuery();
         updateQuery.setSql(sql);
-        updateQuery.setParameters(new ArrayParameters(args,crudDao.getConfiguration().getJdbcNullType()));
+        updateQuery.setParameters(new ArrayParameters(args,crudProxy.getNorm().getJdbcNullType()));
         if(returnType == Void.class || returnType == void.class){
-            crudDao.executeUpdate(updateQuery);
+            crudProxy.executeUpdate(updateQuery);
         }else if(returnType == int.class || returnType == Integer.class){
-            return crudDao.executeUpdate(updateQuery);
+            return crudProxy.executeUpdate(updateQuery);
         }else if(returnType == boolean.class || returnType == Boolean.class){
-            return crudDao.executeUpdate(updateQuery) > 0;
+            return crudProxy.executeUpdate(updateQuery) > 0;
         }
         throw new ExecutorException("@UpdateQuery method return type should be void/int/boolean , :" + returnType.getName());
     }

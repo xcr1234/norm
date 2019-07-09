@@ -5,14 +5,15 @@ import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.NoOp;
 import norm.core.executor.ExecutorFactory;
 import norm.core.generator.DefaultGeneratorFactory;
+import norm.core.generator.QueryGenerator;
 import norm.core.generator.QueryGeneratorFactory;
-import norm.core.interceptor.CrudDaoImpl;
+import norm.core.interceptor.CrudProxyImpl;
 import norm.core.interceptor.CrudDaoInterceptor;
+import norm.core.interceptor.CrudProxy;
 import norm.core.log.SqlLogger;
 import norm.core.meta.Meta;
 import norm.exception.DefaultExceptionTranslator;
 import norm.exception.ExceptionTranslator;
-import norm.exception.QueryException;
 import norm.exception.SpringExceptionTranslator;
 import norm.naming.NameStrategy;
 import norm.page.PageSql;
@@ -191,7 +192,6 @@ public class Norm {
         Connection connection = transactionManager.getConnection();
         if (!JdbcUtils.connClosed(connection) && transactionManager.isBegin()) {
             transactionManager.setBegin(false);
-            ErrorContext.instance().setState("rollback transaction");
             try {
                 connection.rollback();
                 return getExceptionTranslator().translate("rollback success.", e);
@@ -317,8 +317,7 @@ public class Norm {
         if (meta.getIdColumn().getType() != idClass) {
             throw new IllegalArgumentException("illegal bean,id type mismatch :" + tClass + ",dao:" + daoClass);
         }
-        CrudDaoImpl crudDao = new CrudDaoImpl(this, generatorFactory.getGenerator(tClass));
-        crudDao.setBeanClass(tClass);
+        CrudProxy crudDao = createCrudProxy(generatorFactory.getGenerator(tClass));
         Enhancer enhancer = new Enhancer();
         enhancer.setInterfaces(new Class[]{daoClass,NormAware.class});
         enhancer.setCallbacks(new Callback[]{new CrudDaoInterceptor(crudDao), NoOp.INSTANCE});
@@ -326,13 +325,15 @@ public class Norm {
         return (Dao) enhancer.create();
     }
 
-    public CrudDaoImpl createDaoForType(Class daoType){
+    public CrudProxy createProxyForDaoType(Class daoType){
         Type [] types = daoType.getGenericInterfaces();
         ParameterizedType parameterizedType = (ParameterizedType) types[0];
         Class beanClass = (Class) parameterizedType.getActualTypeArguments()[0];
-        CrudDaoImpl crudDao = new CrudDaoImpl(this, generatorFactory.getGenerator(beanClass));
-        crudDao.setBeanClass(beanClass);
-        return crudDao;
+        return createCrudProxy(generatorFactory.getGenerator(beanClass));
+    }
+
+    protected CrudProxy createCrudProxy(QueryGenerator generator){
+        return new CrudProxyImpl(this, generator);
     }
 
 }

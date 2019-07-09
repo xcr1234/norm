@@ -12,6 +12,7 @@ import norm.anno.AfterInstance;
 import norm.anno.Column;
 import norm.anno.Converter;
 import norm.anno.Id;
+import norm.naming.NameStrategy;
 import norm.util.ReflectUtils;
 
 import java.lang.annotation.Annotation;
@@ -80,7 +81,11 @@ public final class ColumnMeta {
         if (column != null && !"".equals(column.value())) {
             return column.value();
         }
-        return meta.getConfiguration().getColumnNameStrategy().format(name);
+        NameStrategy nameStrategy = meta.getColumnNameStrategy();
+        if(nameStrategy == null){
+            nameStrategy = meta.getConfiguration().getColumnNameStrategy();
+        }
+        return nameStrategy.format(name);
     }
 
     public boolean select(){

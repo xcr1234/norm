@@ -3,6 +3,7 @@ package norm.exception;
 import norm.Norm;
 import norm.util.ErrorContext;
 import norm.util.ExceptionUtils;
+import norm.util.ReflectUtils;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;
@@ -12,13 +13,10 @@ import java.sql.SQLException;
 
 public class SpringExceptionTranslator implements ExceptionTranslator {
 
+    private static final String SPRING_TRANSLATOR_CLASS = "org.springframework.jdbc.support.SQLExceptionTranslator";
+
     public static boolean valid() {
-        try {
-            Class.forName("org.springframework.jdbc.support.SQLExceptionTranslator");
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+        return ReflectUtils.inClasspath(SPRING_TRANSLATOR_CLASS);
     }
 
     private SQLExceptionTranslator exceptionTranslator;
@@ -50,7 +48,7 @@ public class SpringExceptionTranslator implements ExceptionTranslator {
             if(transInfo == null){
                 return getExceptionTranslator().translate(errorContext.getState(), errorContext.getSql(), s);
             }else{
-                return getExceptionTranslator().translate(errorContext.getState() + "(transaction status:" + transInfo + ")" ,errorContext.getSql(),s);
+                return getExceptionTranslator().translate(errorContext.getState() + "(" + transInfo + ")" ,errorContext.getSql(),s);
             }
         }
         if (transInfo == null) {

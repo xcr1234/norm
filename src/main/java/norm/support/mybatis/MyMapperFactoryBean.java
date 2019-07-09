@@ -4,8 +4,8 @@ import net.sf.cglib.proxy.Enhancer;
 import norm.CrudDao;
 import norm.Norm;
 import norm.NormAware;
+import norm.core.interceptor.CrudProxy;
 import org.mybatis.spring.mapper.MapperFactoryBean;
-import norm.core.interceptor.CrudDaoImpl;
 
 public class MyMapperFactoryBean<T> extends MapperFactoryBean<T> {
 
@@ -34,7 +34,7 @@ public class MyMapperFactoryBean<T> extends MapperFactoryBean<T> {
         if(!CrudDao.class.isAssignableFrom(mapperInterface)){
             return object;
         }
-        CrudDaoImpl dao = norm.createDaoForType(mapperInterface);
+        CrudProxy dao = norm.createProxyForDaoType(mapperInterface);
         Enhancer enhancer = new Enhancer();
         enhancer.setInterfaces(new Class[]{mapperInterface, NormAware.class,MyBatisMapperAware.class});
         enhancer.setCallback(new MyBatisDaoSupport(object,dao));

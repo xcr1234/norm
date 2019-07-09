@@ -43,7 +43,7 @@ public class ReflectUtils {
         }
     }
 
-    public static Object invokeAndThrow(Method method,Object object,Object... args) throws Throwable{
+    public static Object invokes(Method method,Object object,Object... args) throws Throwable{
         try{
             return method.invoke(object,args);
         }catch (InvocationTargetException e){

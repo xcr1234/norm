@@ -10,6 +10,7 @@ import norm.exception.BeanException;
 import norm.naming.NameStrategy;
 import norm.util.Args;
 import norm.util.BeanUtils;
+import norm.util.ReflectUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -190,23 +191,44 @@ public final class Meta {
         return columnMetas;
     }
 
+    private NameStrategy tableNameStrategy;
+    private NameStrategy columnNameStrategy;
+
+    public NameStrategy getColumnNameStrategy() {
+        Table table = (Table)clazz.getAnnotation(Table.class);
+        if(table != null){
+            if(table.columnNameStrategy() != NameStrategy.class){
+                if(columnNameStrategy == null){
+                    columnNameStrategy = ReflectUtils.newInstance(table.columnNameStrategy());
+                }
+            }
+        }
+        return columnNameStrategy;
+    }
 
     public String getTableName() {
         String globalSchema = configuration.getSchema();
         String schema = null;
         String columnName = null;
+        NameStrategy nameStrategy = configuration.getTableNameStrategy();
         if(clazz.isAnnotationPresent(Table.class)){
             Table table = (Table)clazz.getAnnotation(Table.class);
+            if(table.tableNameStrategy() != NameStrategy.class){
+                if(tableNameStrategy == null){
+                    tableNameStrategy = ReflectUtils.newInstance(table.tableNameStrategy());
+                }
+                nameStrategy = tableNameStrategy;
+            }
             if(!table.schema().isEmpty()){
                 schema = table.schema();
             }
             if(!table.value().isEmpty()){
                 columnName = table.value();
             }else{
-                columnName = configuration.getTableNameStrategy().format(clazz.getSimpleName());
+                columnName = nameStrategy.format(clazz.getSimpleName());
             }
         }else{
-            columnName = configuration.getTableNameStrategy().format(clazz.getSimpleName());
+            columnName = nameStrategy.format(clazz.getSimpleName());
         }
         if(globalSchema == null && schema == null){
             return columnName;

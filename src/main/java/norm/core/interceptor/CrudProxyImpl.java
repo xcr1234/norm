@@ -17,19 +17,19 @@ import norm.util.ErrorContext;
 import java.sql.Connection;
 import java.util.List;
 
-public class CrudDaoImpl implements CrudDao<Object, Object> {
+public class CrudProxyImpl implements CrudProxy {
 
     private Norm norm;
     private QueryGenerator generator;
     private Executor executor;
-    private Class<?> beanClass;
 
-    public CrudDaoImpl(Norm norm, QueryGenerator generator) {
+    public CrudProxyImpl(Norm norm, QueryGenerator generator) {
         this.norm = norm;
         this.generator = generator;
         this.executor = norm.getConfiguration().getExecutorFactory().getExecutor(norm);
     }
 
+    @Override
     public Norm getNorm() {
         return norm;
     }
@@ -37,24 +37,16 @@ public class CrudDaoImpl implements CrudDao<Object, Object> {
     public Configuration getConfiguration() {
         return norm.getConfiguration();
     }
-
+    @Override
     public QueryGenerator getGenerator() {
         return generator;
     }
 
-    public Class<?> getBeanClass() {
-        return beanClass;
-    }
-
-    public void setBeanClass(Class<?> beanClass) {
-        this.beanClass = beanClass;
-    }
-
-    private boolean generateAndUpdate(String id, Object object){
+    public final boolean generateAndUpdate(String id, Object object){
         UpdateQuery query = generator.update(id,object);
         return executeUpdate(query) > 0;
     }
-
+    @Override
     public int executeUpdate(UpdateQuery updateQuery){
         Connection connection = null;
         try{
@@ -67,7 +59,7 @@ public class CrudDaoImpl implements CrudDao<Object, Object> {
             norm.releaseConnection(connection);
         }
     }
-
+    @Override
     public <T> T selectOne(SelectQuery<T> query){
         Connection connection = null;
         try{
@@ -80,7 +72,7 @@ public class CrudDaoImpl implements CrudDao<Object, Object> {
             norm.releaseConnection(connection);
         }
     }
-
+    @Override
     public <T> List<T> selectList(SelectQuery<T> query){
         Connection connection = null;
         try{
@@ -93,7 +85,7 @@ public class CrudDaoImpl implements CrudDao<Object, Object> {
             norm.releaseConnection(connection);
         }
     }
-
+    @Override
     public <T> List<T> selectPage(SelectQuery<T> query,Page<T> page){
         Connection connection = null;
         try{

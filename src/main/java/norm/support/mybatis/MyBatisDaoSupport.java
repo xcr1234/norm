@@ -4,8 +4,8 @@ import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import norm.anno.Query;
 import norm.anno.UpdateQuery;
-import norm.core.interceptor.CrudDaoImpl;
 import norm.core.interceptor.CrudDaoInterceptor;
+import norm.core.interceptor.CrudProxy;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -16,14 +16,14 @@ public class MyBatisDaoSupport implements MethodInterceptor {
     //mybatis的mapper对象
     private Object mapper;
     //norm的dao对象
-    private CrudDaoImpl dao;
+    private CrudProxy crudProxy;
 
     private CrudDaoInterceptor crudDaoInterceptor;
 
-    public MyBatisDaoSupport(Object mapper, CrudDaoImpl dao) {
+    public MyBatisDaoSupport(Object mapper, CrudProxy crudProxy) {
         this.mapper = mapper;
-        this.dao = dao;
-        this.crudDaoInterceptor = new CrudDaoInterceptor(dao);
+        this.crudProxy = crudProxy;
+        this.crudDaoInterceptor = new CrudDaoInterceptor(crudProxy);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class MyBatisDaoSupport implements MethodInterceptor {
             return this.crudDaoInterceptor.handleUpdateQuery(query.sql(),interfaceMethod.getReturnType(),args);
         }
         try{
-            normMethod = CrudDaoImpl.class.getDeclaredMethod(interfaceMethod.getName(),interfaceMethod.getParameterTypes());
+            normMethod = crudProxy.getClass().getDeclaredMethod(interfaceMethod.getName(),interfaceMethod.getParameterTypes());
         }catch (NoSuchMethodException e){
             return handleByMyBatis(interfaceMethod,args);
         }
@@ -57,7 +57,7 @@ public class MyBatisDaoSupport implements MethodInterceptor {
 
     private Object handleByNorm(Method normMethod,Object[] args) throws Throwable{
         try{
-            return normMethod.invoke(dao,args);
+            return normMethod.invoke(crudProxy,args);
         }catch (InvocationTargetException e){
             throw e.getCause();
         }
