@@ -1,18 +1,19 @@
 package norm.page.impl;
 
 import norm.page.Page;
+import norm.page.PageModel;
 import norm.page.PageSql;
 
 public class SQLServerPage implements PageSql {
     @Override
-    public String buildSql(Page page, String querySelect) {
+    public PageModel buildSql(Page page, String querySelect) {
         int lastIndexOfOrderBy = getLastIndexOfOrderBy(querySelect);
         //　没有 order by 或第一页的情况下
         if(lastIndexOfOrderBy < 0 || querySelect.endsWith(")") || page.offset() == 0){
             StringBuilder sb = new StringBuilder(querySelect.length() + 8);
             sb.append(querySelect);
-            sb.insert(getSqlAfterSelectInsertPoint(querySelect)," top " + page.limit());
-            return sb.toString();
+            sb.insert(getSqlAfterSelectInsertPoint(querySelect)," top ?");
+            return new PageModelImpl(sb.toString(),page.limit());
         }else{
             //取出 order by 语句
             String orderby = querySelect.substring(lastIndexOfOrderBy, querySelect.length());
@@ -21,12 +22,11 @@ public class SQLServerPage implements PageSql {
             String selectFld = querySelect.substring(0,indexOfFrom);
             //取出 from 语句后的内容
             String selectFromTableAndWhere = querySelect.substring(indexOfFrom, lastIndexOfOrderBy);
-            return "select * from (" +
+            return new PageModelImpl("select * from (" +
                     selectFld +
                     ",ROW_NUMBER() OVER(" + orderby + ") as _page_row_num_norm " +
                     selectFromTableAndWhere + " ) temp " +
-                    " where  _page_row_num_norm BETWEEN  " +
-                    (page.offset() + 1) + " and " + page.limit();
+                    " where  _page_row_num_norm BETWEEN ? and ?",page.offset()+1,page.limit());
         }
     }
 

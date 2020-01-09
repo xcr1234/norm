@@ -30,4 +30,8 @@ public class ValueParameter implements Parameter{
     public String getName() {
         return property;
     }
+
+    public Object getValue() {
+        return value;
+    }
 }

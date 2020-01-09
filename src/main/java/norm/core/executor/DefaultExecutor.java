@@ -7,6 +7,7 @@ import norm.core.query.SelectQuery;
 import norm.core.query.UpdateQuery;
 import norm.exception.ExecutorException;
 import norm.page.Page;
+import norm.page.PageModel;
 import norm.util.ErrorContext;
 
 import java.sql.*;
@@ -109,7 +110,26 @@ public class DefaultExecutor implements Executor {
                 throw ex;
             }
         }
-        query.setSql(norm.getPageSql().buildSql(page,sql));
+        PageModel pageModel = norm.getPageSql().buildSql(page,sql);
+        query.setSql(pageModel.getSql());
+        Iterable<Parameter> iterable  = query.getParameters();
+        if(iterable != null){
+            List<Parameter> list = new ArrayList<Parameter>();
+            if(iterable instanceof List){
+                list.addAll((List<Parameter>)iterable);
+            }else{
+                for(Parameter parameter : iterable){
+                    list.add(parameter);
+                }
+            }
+            if(pageModel.getFirstParameter() != null){
+                list.add(pageModel.getFirstParameter());
+            }
+            if(pageModel.getSecondParameter() != null){
+                list.add(pageModel.getSecondParameter());
+            }
+            query.setParameters(list);
+        }
     }
 
 

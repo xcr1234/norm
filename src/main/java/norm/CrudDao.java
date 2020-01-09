@@ -110,5 +110,4 @@ public interface CrudDao <T,ID>{
      * @return
      */
     List<T> findAll(QueryWrapper queryWrapper);
-
 }

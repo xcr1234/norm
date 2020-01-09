@@ -1,11 +1,13 @@
 package norm.page.impl;
 
 import norm.page.Page;
+import norm.page.PageModel;
 import norm.page.PageSql;
 
 public class OraclePage implements PageSql {
     @Override
-    public String buildSql(Page page, String sql) {
+    public PageModel buildSql(Page page, String sql) {
+        Integer first = null ,second = null;
         StringBuilder pagingSelect = new StringBuilder( sql.length()+100 );
         if(page.offset() > 0){
             pagingSelect.append("select * from ( select row_.*, rownum rownum_ from ( ");
@@ -14,11 +16,14 @@ public class OraclePage implements PageSql {
         }
         pagingSelect.append(sql);
         if(page.offset() > 0){
-            pagingSelect.append(" ) row_ where rownum <= ").append(page.to()).append(") where rownum_ > ").append(page.from());
+            first = page.to();
+            second = page.from();
+            pagingSelect.append(" ) row_ where rownum <= ?) where rownum_ > ?");
         }else{
-            pagingSelect.append(" ) where rownum <= ").append(page.limit());
+            first = page.limit();
+            pagingSelect.append(" ) where rownum <= ?");
         }
-        return pagingSelect.toString();
+        return new PageModelImpl(pagingSelect.toString(),first,second);
     }
 
 

@@ -1,10 +1,13 @@
 package norm.page.impl;
 import norm.page.Page;
+import norm.page.PageModel;
 import norm.page.PageSql;
 public class PostgreSQLPage implements PageSql {
     @Override
-    public String buildSql(Page page, String sql) {
-        return sql + " limit "+page.limit()+" offset " + page.offset();
+    public PageModel buildSql(Page page, String sql) {
+        return new PageModelImpl(
+                sql + " limit ? offset ?",page.limit(),page.offset()
+        );
     }
 
 

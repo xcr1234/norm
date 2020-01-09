@@ -80,6 +80,7 @@ public class CrudDaoInterceptor implements MethodInterceptor {
         updateQuery.setParameters(new ArrayParameters(args,crudProxy.getNorm().getJdbcNullType()));
         if(returnType == Void.class || returnType == void.class){
             crudProxy.executeUpdate(updateQuery);
+            return null;
         }else if(returnType == int.class || returnType == Integer.class){
             return crudProxy.executeUpdate(updateQuery);
         }else if(returnType == boolean.class || returnType == Boolean.class){

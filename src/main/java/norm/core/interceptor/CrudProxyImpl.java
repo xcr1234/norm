@@ -1,7 +1,6 @@
 package norm.core.interceptor;
 
 import norm.Configuration;
-import norm.CrudDao;
 import norm.Norm;
 import norm.QueryWrapper;
 import norm.core.executor.Executor;
@@ -9,6 +8,7 @@ import norm.core.generator.GeneratorIds;
 import norm.core.generator.QueryGenerator;
 import norm.core.query.SelectQuery;
 import norm.core.query.UpdateQuery;
+import norm.exception.ExecutorException;
 import norm.page.Page;
 import norm.util.AssertUtils;
 import norm.util.ErrorContext;
@@ -95,6 +95,9 @@ public class CrudProxyImpl implements CrudProxy {
     public <T> List<T> selectPage(SelectQuery<T> query,Page<T> page){
         Connection connection = null;
         try{
+            if(norm.getPageSql() == null){
+                throw new ExecutorException("the pageSql of norm has not configured.");
+            }
             connection = openConnection();
             executor.processPage(connection,query,page);
             List<T> list = executor.selectList(connection,query);

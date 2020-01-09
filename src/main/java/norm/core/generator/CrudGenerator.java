@@ -277,7 +277,7 @@ public class CrudGenerator implements QueryGenerator{
     }
 
     @SuppressWarnings("unchecked")
-    protected SelectQuery<?> findAllFilterGenerator(final Object object){
+    protected SelectQueryMiddle<?> findAllFilterGenerator(final Object object){
         final List<Parameter> parameters = new ArrayList<Parameter>();
         SQL sql = query();
         for(ColumnMeta column : meta.getColumnMetas().values()){

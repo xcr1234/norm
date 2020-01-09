@@ -21,6 +21,10 @@ public abstract class AbstractSQL<T> {
 
     public abstract T getSelf();
 
+    public String getStatementName(){
+        return sql.statementType == null ? null : sql.statementType.name();
+    }
+
     public T UPDATE(String table) {
         sql().statementType = SQLStatement.StatementType.UPDATE;
         sql().tables.add(table);

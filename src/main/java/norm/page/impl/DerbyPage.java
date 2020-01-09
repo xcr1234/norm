@@ -1,12 +1,16 @@
 package norm.page.impl;
 import norm.page.Page;
+import norm.page.PageModel;
 import norm.page.PageSql;
 
 import java.util.Locale;
 
 public class DerbyPage implements PageSql {
     @Override
-    public String buildSql(Page page, String query) {
+    public PageModel buildSql(Page page, String query) {
+        Integer first = null;
+        Integer second = null;
+
         final StringBuilder sb = new StringBuilder(query.length() + 50);
         final String normalizedSelect = query.toLowerCase(Locale.ROOT).trim();
         final int forUpdateIndex = normalizedSelect.lastIndexOf( "for update") ;
@@ -25,10 +29,15 @@ public class DerbyPage implements PageSql {
             sb.append( " fetch first " );
         }
         else {
-            sb.append( " offset " ).append( page.offset() ).append( " rows fetch next " );
+            sb.append( " offset ? rows fetch next" );
+            first = page.offset();
         }
-
-        sb.append( page.limit() ).append( " rows only" );
+        sb.append( "? rows only" );
+        if(first == null){
+            first = page.limit();
+        }else{
+            second = page.limit();
+        }
 
         if ( hasForUpdateClause( forUpdateIndex ) ) {
             sb.append( ' ' );
@@ -37,7 +46,7 @@ public class DerbyPage implements PageSql {
         else if ( hasWithClause( normalizedSelect ) ) {
             sb.append( ' ' ).append( query.substring( getWithIndex( query ) ) );
         }
-        return sb.toString();
+        return new PageModelImpl(sb.toString(),first,second);
     }
 
 

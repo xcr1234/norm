@@ -1,14 +1,16 @@
 package norm.support.mybatis.page;
 
+import norm.core.parameter.Parameter;
+import norm.core.parameter.ValueParameter;
 import norm.page.Page;
+import norm.page.PageModel;
 import norm.page.PageSql;
 import norm.page.impl.*;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.apache.ibatis.executor.parameter.ParameterHandler;
 import org.apache.ibatis.executor.resultset.ResultSetHandler;
 import org.apache.ibatis.executor.statement.StatementHandler;
-import org.apache.ibatis.mapping.BoundSql;
-import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.*;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.Invocation;
 import org.apache.ibatis.plugin.PluginException;
@@ -16,6 +18,7 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.apache.ibatis.scripting.defaults.DefaultParameterHandler;
+import org.apache.ibatis.session.Configuration;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -62,6 +65,7 @@ public class PagePlugin implements Interceptor {
 
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object intercept(Invocation invocation) throws Throwable {
         Page page = PageHelper.getPage();
         if(page == null){
@@ -82,21 +86,39 @@ public class PagePlugin implements Interceptor {
                 metaStatementHandler = SystemMetaObject.forObject(object);
             }
             MappedStatement mappedStatement = (MappedStatement) metaStatementHandler.getValue("delegate.mappedStatement");
-
-
+            //判断是不是SELECT操作 并且跳过存储过程
+            if (SqlCommandType.SELECT != mappedStatement.getSqlCommandType()
+                    || StatementType.CALLABLE == mappedStatement.getStatementType()) {
+                return invocation.proceed();
+            }
             BoundSql boundSql = (BoundSql) metaStatementHandler.getValue("delegate.boundSql");
             String sql = boundSql.getSql();
-
-            if(sql.toLowerCase().startsWith("select")){
-
-                String pageSql = this.buildPageSql(page,sql);
-                //重写分页sql
-                metaStatementHandler.setValue("delegate.boundSql.sql", pageSql);
-
-                //计算page count
-                this.evalPageCount(sql, invocation, mappedStatement, boundSql, page);
+            Configuration configuration = (Configuration) metaStatementHandler.getValue("delegate.configuration");
+            PageModel pageModel = this.buildPageSql(page,sql);
+            //1.计算page count
+            this.evalPageCount(sql, invocation, mappedStatement, boundSql, page);
+            //2.重写分页sql
+            metaStatementHandler.setValue("delegate.boundSql.sql", pageModel.getSql());
+            //3.重写参数映射parameterMappings，将参数值写到additionalParameters中
+            List<ParameterMapping> origin = (List<ParameterMapping>) metaStatementHandler.getValue("delegate.boundSql.parameterMappings");
+            List<ParameterMapping> parameterMappings = new ArrayList<ParameterMapping>(origin.size() + 2);
+            parameterMappings.addAll(origin);
+            Map<String, Object> additionalParameters = (Map<String, Object>) metaStatementHandler.getValue("delegate.boundSql.additionalParameters");
+            if(pageModel.getFirstParameter() != null){
+                ValueParameter first = pageModel.getFirstParameter();
+                parameterMappings.add(
+                        new ParameterMapping.Builder(configuration,first.getName(),first.getValue().getClass())
+                                .build());
+                additionalParameters.put(first.getName(),first.getValue());
             }
-
+            if(pageModel.getSecondParameter() != null){
+                ValueParameter second = pageModel.getSecondParameter();
+                parameterMappings.add(
+                        new ParameterMapping.Builder(configuration,second.getName(),second.getValue().getClass())
+                                .build());
+                additionalParameters.put(second.getName(),second.getValue());
+            }
+            metaStatementHandler.setValue("delegate.boundSql.parameterMappings", parameterMappings);
             return invocation.proceed();
         }else if(invocation.getTarget() instanceof ResultSetHandler){
             return invocation.proceed();
@@ -130,7 +152,7 @@ public class PagePlugin implements Interceptor {
         this.database = database;
     }
 
-    private String buildPageSql(Page page,String sql){
+    private PageModel buildPageSql(Page page, String sql){
         PageSql pageSql = pageSqlMap.get(this.database.toLowerCase());
         if(pageSql == null){
             throw new PluginException("not support database :" + this.database);
@@ -141,7 +163,7 @@ public class PagePlugin implements Interceptor {
     private void evalPageCount(String sql, Invocation invocation, MappedStatement mappedStatement,
                                BoundSql boundSql, Page page){
         if(page.isEvalCount()){
-            String countSql = "select count(1) from ( " + sql + " )";
+            String countSql = "select count(1) from ( " + sql + " ) count_";
             Connection connection = (Connection) invocation.getArgs()[0];
             PreparedStatement ps = null;
             ResultSet rs = null;

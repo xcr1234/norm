@@ -146,6 +146,10 @@ public class Configuration {
                 throw new ExecutorException("register driver failed , class not found :" + driverClass);
             }
         }
+
+        if(url == null){
+            throw new ExecutorException("the jdbc url or dataSource of norm not configured!");
+        }
         Properties properties = null;
         if(connProperties != null){
             properties = new Properties(connProperties);
