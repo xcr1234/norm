@@ -22,8 +22,12 @@ public class CrudResultSetHandler implements ResultSetHandler {
     }
 
     @Override
-    public Object handle(ResultSet resultSet) throws SQLException {
-        ResultSetMetaData metaData = resultSet.getMetaData();
+    public boolean requiresResultSetMetaData(ResultSet resultSet) {
+        return true;
+    }
+
+    @Override
+    public Object handle(ResultSet resultSet,ResultSetMetaData metaData) throws SQLException {
         Set<String> columns = new HashSet<String>();
         int count = metaData.getColumnCount();
         for(int i=1;i<=count;i++){

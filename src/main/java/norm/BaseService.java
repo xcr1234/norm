@@ -26,18 +26,12 @@ public interface BaseService<T,ID> {
      */
     boolean deleteByID(ID id);
 
-    /**
-     * 删除数据表的全部内容
-     * @return 删除成功的数量，失败返回0
-     */
-    int deleteAll();
-
 
     /**
      * 更新（update）一个实体对象
      * @param t 待更新的对象，不可为null
      */
-    void update(T t);
+    boolean update(T t);
 
     /**
      * 判断实体id是否在数据表中

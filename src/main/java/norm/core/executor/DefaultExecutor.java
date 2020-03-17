@@ -42,15 +42,20 @@ public class DefaultExecutor implements Executor {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try{
+
             ps = prepareStatement(connection,query.getSql());
             setParameters(ps,query.getParameters());
             errorContext.setState(ErrorContext.EXECUTE_QUERY);
             rs = ps.executeQuery();
+            ResultSetMetaData md = null;
+            if(query.getResultSetHandler().requiresResultSetMetaData(rs)){
+                md = rs.getMetaData();
+            }
             errorContext.setState(ErrorContext.MAP_OBJECTS);
             if(!rs.next()){
                 return null;
             }
-            T t = query.getResultSetHandler().handle(rs);
+            T t = query.getResultSetHandler().handle(rs,md);
             if(rs.next()){
                 throw new ExecutorException("Executor error:selectOne() expected 0 or 1 row , but got least 2 rows.");
             }
@@ -70,10 +75,14 @@ public class DefaultExecutor implements Executor {
             setParameters(ps,query.getParameters());
             errorContext.setState(ErrorContext.EXECUTE_QUERY);
             rs = ps.executeQuery();
+            ResultSetMetaData md = null;
+            if(query.getResultSetHandler().requiresResultSetMetaData(rs)){
+                md = rs.getMetaData();
+            }
             errorContext.setState(ErrorContext.MAP_OBJECTS);
             List<T> list = new ArrayList<T>();
             while (rs.next()){
-                T t = query.getResultSetHandler().handle(rs);
+                T t = query.getResultSetHandler().handle(rs,md);
                 list.add(t);
             }
             return list;

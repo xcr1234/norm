@@ -29,13 +29,10 @@ public abstract class Service<T, ID> implements BaseService<T, ID> {
     public boolean deleteByID(ID id) {
         return dao.deleteByID(id);
     }
+
     @Override
-    public int deleteAll() {
-        return dao.deleteAll();
-    }
-    @Override
-    public void update(T t) {
-        dao.update(t);
+    public boolean update(T t) {
+        return dao.update(t);
     }
     @Override
     public boolean exists(ID id) {

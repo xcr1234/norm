@@ -1,5 +1,6 @@
 package org.norm.test;
 
+import norm.JdbcTemplate;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -79,6 +80,19 @@ public class CrudTest extends BaseConnTest {
         norm.commit();
     }
 
+    @Test
+    public void testTemplate(){
+        JdbcTemplate<Car> jdbcTemplate = carDao.getJdbcTemplate();
+
+        String sql = jdbcTemplate.selectSql() + "where name like ?";
+
+        List<Car> cars = jdbcTemplate.queryList(sql,"%兰博基尼%");
+
+        System.out.println(cars);
+
+        System.out.println(jdbcTemplate.queryOne("select count(*) from " + jdbcTemplate.table(),int.class));
+    }
+
 
     @Test
     public void testdeleteByID() {
@@ -101,22 +115,6 @@ public class CrudTest extends BaseConnTest {
     }
 
 
-    @Test
-    public void testDelete() {
-        norm.begin();
-
-        int rows = carDao.deleteAll();
-
-        System.out.println("delete :" + rows);
-
-        System.out.println("list=" + carDao.findAll());
-
-        norm.rollback();
-
-        System.out.println("list=" + carDao.findAll());
-
-        norm.commit();
-    }
 
 
     @Test

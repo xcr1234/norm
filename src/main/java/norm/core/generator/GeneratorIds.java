@@ -4,7 +4,6 @@ public interface GeneratorIds {
     String SAVE = "save";
     String DELETE = "delete";
     String DELETE_BY_ID = "deleteByID";
-    String DELETE_ALL = "deleteAll";
     String UPDATE = "update";
     String EXISTS = "exists";
     String COUNT = "count";

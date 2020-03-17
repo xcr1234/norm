@@ -37,6 +37,11 @@ public class CrudGenerator implements QueryGenerator{
     }
 
     @Override
+    public Meta getMeta() {
+        return meta;
+    }
+
+    @Override
     public SelectQuery<?> select(String id, Object object) {
         if(GeneratorIds.EXISTS.equals(id)){
             return exists(object);
@@ -67,9 +72,6 @@ public class CrudGenerator implements QueryGenerator{
         }
         if(GeneratorIds.DELETE_BY_ID.equals(id)){
             return deleteByIdGenerator(object);
-        }
-        if(GeneratorIds.DELETE_ALL.equals(id)){
-            return deleteAllGenerator();
         }
         if(GeneratorIds.UPDATE.equals(id)){
             return updateGenerator(object);
@@ -175,14 +177,7 @@ public class CrudGenerator implements QueryGenerator{
         return updateQuery;
     }
 
-    protected UpdateQuery deleteAllGenerator(){
-        UpdateQuery updateQuery = new UpdateQuery();
-        updateQuery.setSql(new SQL(){{
-            DELETE_FROM(meta.getTableName());
-        }}.toString());
-        updateQuery.setParameters(Collections.<Parameter>emptyList());
-        return updateQuery;
-    }
+
 
     protected SelectQuery<Integer> exists(final Object object){
         if(object == null){

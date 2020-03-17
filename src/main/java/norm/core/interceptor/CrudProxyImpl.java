@@ -1,6 +1,7 @@
 package norm.core.interceptor;
 
 import norm.Configuration;
+import norm.JdbcTemplate;
 import norm.Norm;
 import norm.QueryWrapper;
 import norm.core.executor.Executor;
@@ -20,14 +21,16 @@ import java.util.List;
 
 public class CrudProxyImpl implements CrudProxy {
 
-    private Norm norm;
-    private QueryGenerator generator;
-    private Executor executor;
+    private final Norm norm;
+    private final QueryGenerator generator;
+    private final Executor executor;
+    private final JdbcTemplate<Object> jdbcTemplate;
 
     public CrudProxyImpl(Norm norm, QueryGenerator generator) {
         this.norm = norm;
         this.generator = generator;
         this.executor = norm.getConfiguration().getExecutorFactory().getExecutor(norm);
+        this.jdbcTemplate = new JdbcTemplateImpl<Object>(this);
     }
 
     @Override
@@ -128,16 +131,11 @@ public class CrudProxyImpl implements CrudProxy {
         return generateAndUpdate(GeneratorIds.DELETE_BY_ID,o);
     }
 
-    @Override
-    public int deleteAll() {
-        UpdateQuery query = generator.update(GeneratorIds.DELETE_ALL,null);
-        return executeUpdate(query);
-    }
 
     @Override
-    public void update(Object o) {
+    public boolean update(Object o) {
         AssertUtils.notNull(o,"update object");
-        generateAndUpdate(GeneratorIds.UPDATE,o);
+        return generateAndUpdate(GeneratorIds.UPDATE,o);
     }
 
     @SuppressWarnings("unchecked")
@@ -196,6 +194,11 @@ public class CrudProxyImpl implements CrudProxy {
     public List<Object> findAll(QueryWrapper queryWrapper) {
         SelectQuery<Object> query = (SelectQuery<Object>) generator.findAllQuery(queryWrapper);
         return selectList(query);
+    }
+
+    @Override
+    public JdbcTemplate<Object> getJdbcTemplate() {
+        return this.jdbcTemplate;
     }
 
     @Override
