@@ -10,6 +10,6 @@ Norm 2.0稳定版本中，代码全部重构
 <dependency>
     <groupId>io.github.xcr1234</groupId>
     <artifactId>norm</artifactId>
-    <version>2.2</version>
+    <version>2.3</version>
 </dependency>
 ```
