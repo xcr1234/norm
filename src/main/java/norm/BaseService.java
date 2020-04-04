@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface BaseService<T,ID> {
     /**
-     * 将实体对象保存（insert）到数据库中
+     * 将实体对象保存（insert）到数据库中，如果有自增ID则获取自增ID的值
      * @param t 待保存的对象，不可为null
      * @return 若保存成功则返回该对象（对自增主键会自动处理），若不成功则返回null.
      */
@@ -44,7 +44,7 @@ public interface BaseService<T,ID> {
      * 计算数据表中的总数
      * @return 总数量
      */
-    int count(Object o);
+    int count(T o);
 
     /**
      * 根据id的值查询实体
@@ -52,6 +52,13 @@ public interface BaseService<T,ID> {
      * @return 返回查询到的实体，如果id不存在则返回null
      */
     T findOne(ID id);
+
+    /**
+     * 根据iqueryWrapper查询实体
+     * @param queryWrapper 查询条件
+     * @return 返回查询到的实体，如果不存在则返回null
+     */
+    T findOne(QueryWrapper queryWrapper);
 
     /**
      * 返回所有的实体List，返回值其实是一个{@link java.util.ArrayList}

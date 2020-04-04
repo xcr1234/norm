@@ -14,6 +14,7 @@ import norm.core.parameter.ArrayParameters;
 import norm.core.parameter.ColumnPropertyParameter;
 import norm.core.parameter.ColumnValueParameter;
 import norm.core.parameter.Parameter;
+import norm.core.query.ReturnGenerateId;
 import norm.core.query.SelectQuery;
 import norm.core.query.SelectQueryMiddle;
 import norm.core.query.UpdateQuery;
@@ -144,6 +145,15 @@ public class CrudGenerator implements QueryGenerator{
             }
         }}.toString());
         updateQuery.setParameters(parameters);
+        ColumnMeta idColumn = meta.getIdColumn();
+        Id id = idColumn.getAnnotation(Id.class);
+        if(norm.isGetGenerateId() && id != null && !id.identity() && idColumn.get(object) == null){
+            //当id自增并且值为空时，需要获取自增id的值
+            ReturnGenerateId returnGenerateId = new ReturnGenerateId();
+            returnGenerateId.setIdColumn(idColumn);
+            returnGenerateId.setTarget(object);
+            updateQuery.setReturnGenerateId(returnGenerateId);
+        }
         return updateQuery;
     }
 
@@ -198,7 +208,7 @@ public class CrudGenerator implements QueryGenerator{
         final List<Parameter> parameters = new ArrayList<Parameter>();
         SelectQuery<Integer> selectQuery = new SelectQuery<Integer>();
         selectQuery.setSql(new SQL(){{
-            SELECT("count(1)");
+            SELECT("count(*)");
             FROM(meta.getTableName());
             if(object != null){
                 for(ColumnMeta columnMeta : meta.getColumnMetas().values()){

@@ -28,7 +28,7 @@ public class String2DateConverter implements TypeConverter<Date> {
 
 
     @Override
-    public Date getObject(ResultSet resultSet, String column) throws SQLException {
+    public Date getObject(ResultSet resultSet, String column,Class<Date> requiredType) throws SQLException {
         String value = resultSet.getString(column);
         if(value == null){
             return null;

@@ -149,6 +149,7 @@ public class CrudProxyImpl implements CrudProxy {
     @SuppressWarnings("unchecked")
     @Override
     public int count(Object o) {
+        AssertUtils.notNull(o,"the object");
         SelectQuery<Integer> query = (SelectQuery<Integer>) generator.select(GeneratorIds.COUNT,o);
         return selectOne(query);
     }
@@ -157,6 +158,14 @@ public class CrudProxyImpl implements CrudProxy {
     public Object findOne(Object o) {
         AssertUtils.notNull(o,"select object");
         SelectQuery<?> query = generator.select(GeneratorIds.FIND_ONE,o);
+        return selectOne(query);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object findOne(QueryWrapper queryWrapper) {
+        AssertUtils.notNull(queryWrapper,"the QueryWrapper");
+        SelectQuery<Object> query = (SelectQuery<Object>) generator.findAllQuery(queryWrapper);
         return selectOne(query);
     }
 
@@ -178,6 +187,7 @@ public class CrudProxyImpl implements CrudProxy {
     @Override
     @SuppressWarnings("unchecked")
     public List<Object> findAll(Object o) {
+        AssertUtils.notNull(o,"the object");
         SelectQuery<Object> query = (SelectQuery<Object>) generator.select(GeneratorIds.FIND_ALL,o);
         return selectList(query);
     }
@@ -185,6 +195,8 @@ public class CrudProxyImpl implements CrudProxy {
     @Override
     @SuppressWarnings("unchecked")
     public List<Object> findAll(QueryWrapper queryWrapper, Page<Object> page) {
+        AssertUtils.notNull(queryWrapper,"the QueryWrapper");
+        AssertUtils.notNull(page,"the page");
         SelectQuery<Object> query = (SelectQuery<Object>) generator.findAllQuery(queryWrapper);
         return selectPage(query,page);
     }
@@ -192,6 +204,7 @@ public class CrudProxyImpl implements CrudProxy {
     @Override
     @SuppressWarnings("unchecked")
     public List<Object> findAll(QueryWrapper queryWrapper) {
+        AssertUtils.notNull(queryWrapper,"the QueryWrapper");
         SelectQuery<Object> query = (SelectQuery<Object>) generator.findAllQuery(queryWrapper);
         return selectList(query);
     }
@@ -204,6 +217,7 @@ public class CrudProxyImpl implements CrudProxy {
     @Override
     @SuppressWarnings("unchecked")
     public List<Object> findAll(Object o, Page page) {
+        AssertUtils.notNull(o,"the object");
         AssertUtils.notNull(page,"page object");
         SelectQuery<Object> query = (SelectQuery<Object>) generator.select(GeneratorIds.FIND_ALL,o);
         return selectPage(query,page);

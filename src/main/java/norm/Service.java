@@ -39,13 +39,19 @@ public abstract class Service<T, ID> implements BaseService<T, ID> {
         return dao.exists(id);
     }
     @Override
-    public int count(Object o) {
+    public int count(T o) {
         return dao.count(o);
     }
     @Override
     public T findOne(ID id) {
         return dao.findOne(id);
     }
+
+    @Override
+    public T findOne(QueryWrapper queryWrapper) {
+        return dao.findOne(queryWrapper);
+    }
+
     @Override
     public List<T> findAll() {
         return dao.findAll();

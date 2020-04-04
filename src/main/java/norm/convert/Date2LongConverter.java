@@ -9,7 +9,7 @@ import java.sql.*;
  */
 public class Date2LongConverter implements TypeConverter<Long> {
     @Override
-    public Long getObject(ResultSet resultSet, String column) throws SQLException {
+    public Long getObject(ResultSet resultSet, String column,Class<Long> requiredType) throws SQLException {
         Timestamp timestamp = resultSet.getTimestamp(column);
         if(timestamp == null){
             return null;

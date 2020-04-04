@@ -69,13 +69,13 @@ public class CrudTest extends BaseConnTest {
         norm.begin();
 
         Car car = new Car();
-        car.setId(5);
         car.setName("迈巴赫exelero");
         car.setDesc("运动跑车极品");
 
         System.out.println(carDao.save(car));
 
-        System.out.println(carDao.findOne(5));
+        System.out.println(car);
+        System.out.println(car.getId());
 
         norm.commit();
     }
@@ -143,7 +143,9 @@ public class CrudTest extends BaseConnTest {
 
     @Test
     public void testCount() {
-        System.out.println(carDao.count(null));
+        Car car = new Car();
+        car.setName("保时捷macan");
+        System.out.println(carDao.count(car));
     }
 
     @Test

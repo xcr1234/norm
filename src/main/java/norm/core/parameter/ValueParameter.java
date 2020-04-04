@@ -22,7 +22,6 @@ public class ValueParameter implements Parameter{
 
     @Override
     public void setParameter(PreparedStatement ps, int index) throws SQLException {
-        ErrorContext.instance().addParam(value);
         JdbcUtils.setParameter(ps,index,value, nullType,null);
     }
 
@@ -31,6 +30,7 @@ public class ValueParameter implements Parameter{
         return property;
     }
 
+    @Override
     public Object getValue() {
         return value;
     }

@@ -1,16 +1,19 @@
 package norm.util;
 
 
+import norm.convert.IEnum;
 import norm.exception.ExecutorException;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.*;
 
 public final class JdbcUtils {
 
-    public static boolean connClosed(Connection connection){
+    public static boolean connClosed(Connection connection) {
         try {
             return connection == null || connection.isClosed();
         } catch (SQLException e) {
@@ -18,22 +21,22 @@ public final class JdbcUtils {
         }
     }
 
-    public static void closeObjects(Connection connection,ResultSet rs,PreparedStatement ps){
-        if(rs != null){
+    public static void closeObjects(Connection connection, ResultSet rs, PreparedStatement ps) {
+        if (rs != null) {
             try {
                 rs.close();
             } catch (SQLException e) {
 
             }
         }
-        if(ps != null){
+        if (ps != null) {
             try {
                 ps.close();
             } catch (SQLException e) {
 
             }
         }
-        if(connection != null){
+        if (connection != null) {
             try {
                 connection.close();
             } catch (SQLException e) {
@@ -42,17 +45,23 @@ public final class JdbcUtils {
         }
     }
 
-    public static void close(Connection connection){
-        closeObjects(connection,null,null);
+    public static void close(Connection connection) {
+        closeObjects(connection, null, null);
     }
 
-    public static void setParameter(PreparedStatement ps,int index,Object value,int nullType,Integer type) throws SQLException{
-        if(value == null){
-            ps.setNull(index,nullType);
-        }else if(type != null){
-            ps.setObject(index,value,type);
-        }else{
-            setParameter(ps,index,value);
+    public static void setParameter(PreparedStatement ps, int index, Object value, int nullType, Integer type) throws SQLException {
+        if (value == null) {
+            ps.setNull(index, nullType);
+        } else if (value.getClass().isEnum()) {
+            if (value instanceof IEnum) {
+                setParameter(ps, index, ((IEnum) value).getValue(), nullType, type);
+            } else {
+                setParameter(ps, index, ((Enum) value).name());
+            }
+        } else if (type != null) {
+            ps.setObject(index, value, type);
+        } else {
+            setParameter(ps, index, value);
         }
     }
 
@@ -100,160 +109,205 @@ public final class JdbcUtils {
     }
 
 
-
-    public static Object getObject(ResultSet resultSet, String index, Class<?> type)throws SQLException{
-        if(type == String.class){
+    public static Object getObject(ResultSet resultSet, String index, Class<?> type) throws SQLException {
+        if (type == String.class) {
             return resultSet.getString(index);
-        }else if(type == Boolean.class || type == boolean.class){
+        } else if (type == Boolean.class || type == boolean.class) {
             boolean b = resultSet.getBoolean(index);
-            if(resultSet.wasNull()){
+            if (resultSet.wasNull()) {
                 return null;
             }
             return b;
-        }else if(type == Byte.class || type == byte.class){
+        } else if (type == Byte.class || type == byte.class) {
             byte b = resultSet.getByte(index);
-            if(resultSet.wasNull()){
+            if (resultSet.wasNull()) {
                 return null;
             }
             return b;
-        }else if(type == Short.class || type == short.class){
+        } else if (type == Short.class || type == short.class) {
             short s = resultSet.getShort(index);
-            if(resultSet.wasNull()){
+            if (resultSet.wasNull()) {
                 return null;
             }
             return s;
-        }else if(type == Integer.class || type == int.class){
+        } else if (type == Integer.class || type == int.class) {
             int i = resultSet.getInt(index);
-            if(resultSet.wasNull()){
+            if (resultSet.wasNull()) {
                 return null;
             }
             return i;
-        }else if(type == Long.class || type == long.class){
+        } else if (type == Long.class || type == long.class) {
             long l = resultSet.getLong(index);
-            if(resultSet.wasNull()){
+            if (resultSet.wasNull()) {
                 return null;
             }
             return l;
-        }else if(type == Float.class || type == float.class){
+        } else if (type == Float.class || type == float.class) {
             float f = resultSet.getFloat(index);
-            if(resultSet.wasNull()){
+            if (resultSet.wasNull()) {
                 return null;
             }
             return f;
-        }else if(type == Double.class || type == double.class){
-            double d =  resultSet.getDouble(index);
-            if(resultSet.wasNull()){
+        } else if (type == Double.class || type == double.class) {
+            double d = resultSet.getDouble(index);
+            if (resultSet.wasNull()) {
                 return null;
             }
             return d;
-        }else if(type == BigDecimal.class){
+        } else if (type == BigDecimal.class) {
             return resultSet.getBigDecimal(index);
-        }else if(type == byte[].class){
+        } else if (type == byte[].class) {
             return resultSet.getBytes(index);
-        }else if(type == java.util.Date.class){
+        } else if (type == java.util.Date.class) {
             Timestamp timestamp = resultSet.getTimestamp(index);
             return timestamp == null ? null : new java.util.Date(timestamp.getTime());
-        }else if(type == java.sql.Date.class){
+        } else if (type == java.sql.Date.class) {
             return resultSet.getDate(index);
-        }else if(type == java.sql.Time.class){
+        } else if (type == java.sql.Time.class) {
             return resultSet.getTime(index);
-        }else if(type == java.sql.Timestamp.class){
+        } else if (type == java.sql.Timestamp.class) {
             return resultSet.getTimestamp(index);
-        }else if(type == Blob.class){
+        } else if (type == Blob.class) {
             return resultSet.getBlob(index);
-        }else if(type == Clob.class){
+        } else if (type == Clob.class) {
             return resultSet.getClob(index);
-        }else if(InputStream.class.isAssignableFrom(type)){
+        } else if (InputStream.class.isAssignableFrom(type)) {
             Blob blob = resultSet.getBlob(index);
-            if(blob == null){
+            if (blob == null) {
                 return null;
             }
             return resultSet.getBlob(index).getBinaryStream();
-        }else if(Reader.class.isAssignableFrom(type)) {
+        } else if (Reader.class.isAssignableFrom(type)) {
             Clob clob = resultSet.getClob(index);
-            if(clob == null){
+            if (clob == null) {
                 return null;
             }
             return clob.getCharacterStream();
+        } else if (type.isEnum()) {
+            if (IEnum.class.isAssignableFrom(type)) {
+                Method method = ReflectUtils.getMethodOrNull(type, "getValue");
+                AssertUtils.notNull(method, "getValue() of class " + type.getName());
+                Object value = getObject(resultSet, index, method.getReturnType());
+                if (value == null) {
+                    return null;
+                }
+                Object array = type.getEnumConstants();
+                for (int i = 0; i < Array.getLength(array); i++) {
+                    IEnum iEnum = (IEnum) Array.get(array, i);
+                    if (value.equals(iEnum.getValue())) {
+                        return iEnum;
+                    }
+                }
+                return null;
+            } else {
+                String result = resultSet.getString(index);
+                if (result == null) {
+                    return null;
+                }
+                return Enum.valueOf((Class) type, result);
+            }
         }
-        throw new ExecutorException("can't get object:unsupported type :"+type);
+        throw new ExecutorException("can't get object:unsupported type :" + type);
     }
 
-    public static Object getObject(ResultSet resultSet, int index, Class<?> type)throws SQLException{
-        if(type == String.class){
+    public static Object getObject(ResultSet resultSet, int index, Class<?> type) throws SQLException {
+        if (type == String.class) {
             return resultSet.getString(index);
-        }else if(type == Boolean.class || type == boolean.class){
+        } else if (type == Boolean.class || type == boolean.class) {
             boolean b = resultSet.getBoolean(index);
-            if(resultSet.wasNull()){
+            if (resultSet.wasNull()) {
                 return null;
             }
             return b;
-        }else if(type == Byte.class || type == byte.class){
+        } else if (type == Byte.class || type == byte.class) {
             byte b = resultSet.getByte(index);
-            if(resultSet.wasNull()){
+            if (resultSet.wasNull()) {
                 return null;
             }
             return b;
-        }else if(type == Short.class || type == short.class){
+        } else if (type == Short.class || type == short.class) {
             short s = resultSet.getShort(index);
-            if(resultSet.wasNull()){
+            if (resultSet.wasNull()) {
                 return null;
             }
             return s;
-        }else if(type == Integer.class || type == int.class){
+        } else if (type == Integer.class || type == int.class) {
             int i = resultSet.getInt(index);
-            if(resultSet.wasNull()){
+            if (resultSet.wasNull()) {
                 return null;
             }
             return i;
-        }else if(type == Long.class || type == long.class){
+        } else if (type == Long.class || type == long.class) {
             long l = resultSet.getLong(index);
-            if(resultSet.wasNull()){
+            if (resultSet.wasNull()) {
                 return null;
             }
             return l;
-        }else if(type == Float.class || type == float.class){
+        } else if (type == Float.class || type == float.class) {
             float f = resultSet.getFloat(index);
-            if(resultSet.wasNull()){
+            if (resultSet.wasNull()) {
                 return null;
             }
             return f;
-        }else if(type == Double.class || type == double.class){
-            double d =  resultSet.getDouble(index);
-            if(resultSet.wasNull()){
+        } else if (type == Double.class || type == double.class) {
+            double d = resultSet.getDouble(index);
+            if (resultSet.wasNull()) {
                 return null;
             }
             return d;
-        }else if(type == BigDecimal.class){
+        } else if (type == BigDecimal.class) {
             return resultSet.getBigDecimal(index);
-        }else if(type == byte[].class){
+        } else if (type == byte[].class) {
             return resultSet.getBytes(index);
-        }else if(type == java.util.Date.class){
+        } else if (type == java.util.Date.class) {
             Timestamp timestamp = resultSet.getTimestamp(index);
             return timestamp == null ? null : new java.util.Date(timestamp.getTime());
-        }else if(type == java.sql.Date.class){
+        } else if (type == java.sql.Date.class) {
             return resultSet.getDate(index);
-        }else if(type == java.sql.Time.class){
+        } else if (type == java.sql.Time.class) {
             return resultSet.getTime(index);
-        }else if(type == java.sql.Timestamp.class){
+        } else if (type == java.sql.Timestamp.class) {
             return resultSet.getTimestamp(index);
-        }else if(type == Blob.class){
+        } else if (type == Blob.class) {
             return resultSet.getBlob(index);
-        }else if(type == Clob.class){
+        } else if (type == Clob.class) {
             return resultSet.getClob(index);
-        }else if(InputStream.class.isAssignableFrom(type)){
+        } else if (InputStream.class.isAssignableFrom(type)) {
             Blob blob = resultSet.getBlob(index);
-            if(blob == null){
+            if (blob == null) {
                 return null;
             }
             return resultSet.getBlob(index).getBinaryStream();
-        }else if(Reader.class.isAssignableFrom(type)) {
+        } else if (Reader.class.isAssignableFrom(type)) {
             Clob clob = resultSet.getClob(index);
-            if(clob == null){
+            if (clob == null) {
                 return null;
             }
             return clob.getCharacterStream();
+        } else if (type.isEnum()) {
+            if (IEnum.class.isAssignableFrom(type)) {
+                Method method = ReflectUtils.getMethodOrNull(type, "getValue");
+                AssertUtils.notNull(method, "getValue() of class " + type.getName());
+                Object value = getObject(resultSet, index, method.getReturnType());
+                if (value == null) {
+                    return null;
+                }
+                Object array = type.getEnumConstants();
+                for (int i = 0; i < Array.getLength(array); i++) {
+                    IEnum iEnum = (IEnum) Array.get(array, i);
+                    if (value.equals(iEnum.getValue())) {
+                        return iEnum;
+                    }
+                }
+                return null;
+            } else {
+                String result = resultSet.getString(index);
+                if (result == null) {
+                    return null;
+                }
+                return Enum.valueOf((Class) type, result);
+            }
         }
-        throw new ExecutorException("can't get object:unsupported type :"+type);
+        throw new ExecutorException("can't get object:unsupported type :" + type);
     }
 }

@@ -7,6 +7,7 @@ import norm.core.executor.ExecutorFactory;
 import norm.core.generator.DefaultGeneratorFactory;
 import norm.core.generator.QueryGenerator;
 import norm.core.generator.QueryGeneratorFactory;
+import norm.core.id.IdGenerator;
 import norm.core.interceptor.CrudProxyImpl;
 import norm.core.interceptor.CrudDaoInterceptor;
 import norm.core.interceptor.CrudProxy;
@@ -31,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Norm {
-    private ExceptionTranslator exceptionTranslator;
+    private ExceptionTranslator exceptionTranslator = initExceptionTranslator();
     private Configuration configuration = new Configuration();
     private QueryGeneratorFactory generatorFactory = new DefaultGeneratorFactory(this);
     private Map<Class, Object> daoCache = new HashMap<Class, Object>();
@@ -73,17 +74,10 @@ public class Norm {
     }
 
     protected ExceptionTranslator initExceptionTranslator() {
-        if (SpringExceptionTranslator.valid()) {
-            return new SpringExceptionTranslator(this);
-        } else {
-            return new DefaultExceptionTranslator();
-        }
+        return new DefaultExceptionTranslator();
     }
 
     public ExceptionTranslator getExceptionTranslator(){
-        if(this.exceptionTranslator == null){
-            this.exceptionTranslator = initExceptionTranslator();
-        }
         return this.exceptionTranslator;
     }
 
@@ -112,6 +106,13 @@ public class Norm {
         configuration.setColumnNameStrategy(columnNameStrategy);
     }
 
+    public IdGenerator getIdGenerator() {
+        return configuration.getIdGenerator();
+    }
+
+    public void setIdGenerator(IdGenerator idGenerator) {
+        configuration.setIdGenerator(idGenerator);
+    }
 
     public boolean isShowSql() {
         return configuration.isShowSql();
@@ -134,6 +135,14 @@ public class Norm {
 
     public void setPageSql(PageSql pageSql) {
         configuration.setPageSql(pageSql);
+    }
+
+    public boolean isGetGenerateId() {
+        return configuration.isGetGenerateId();
+    }
+
+    public void setGetGenerateId(boolean getGenerateId) {
+        configuration.setGetGenerateId(getGenerateId);
     }
 
     public ExecutorFactory getExecutorFactory() {

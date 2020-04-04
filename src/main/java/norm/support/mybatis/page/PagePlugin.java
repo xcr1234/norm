@@ -163,7 +163,7 @@ public class PagePlugin implements Interceptor {
     private void evalPageCount(String sql, Invocation invocation, MappedStatement mappedStatement,
                                BoundSql boundSql, Page page){
         if(page.isEvalCount()){
-            String countSql = "select count(1) from ( " + sql + " ) count_";
+            String countSql = "select count(*) from ( " + sql + " ) count_";
             Connection connection = (Connection) invocation.getArgs()[0];
             PreparedStatement ps = null;
             ResultSet rs = null;

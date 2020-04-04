@@ -42,7 +42,6 @@ public final class ColumnMeta {
             typeConverter = ReflectUtils.newInstance(converter.value());
             typeConverter.init(converter.init());
         }
-
     }
 
     public Configuration getConfiguration(){

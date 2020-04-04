@@ -22,12 +22,16 @@ public class ColumnPropertyParameter implements Parameter {
     @Override
     public void setParameter(PreparedStatement ps, int index) throws SQLException {
         Object value = columnMeta.get(object);
-        ErrorContext.instance().addParam(value);
         if(columnMeta.getTypeConverter() != null){
             columnMeta.getTypeConverter().setParameter(ps,index,value);
         }else{
             JdbcUtils.setParameter(ps,index,value,columnMeta.getConfiguration().getJdbcNullType(),columnMeta.getJdbcType());
         }
+    }
+
+    @Override
+    public Object getValue() {
+        return columnMeta.get(object);
     }
 
     @Override

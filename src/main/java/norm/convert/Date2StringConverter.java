@@ -25,7 +25,7 @@ public class Date2StringConverter implements TypeConverter<String> {
     }
 
     @Override
-    public String getObject(ResultSet resultSet, String column) throws SQLException {
+    public String getObject(ResultSet resultSet, String column,Class<String> requiredType) throws SQLException {
         Timestamp timestamp = resultSet.getTimestamp(column);
         if(timestamp == null){
             return null;

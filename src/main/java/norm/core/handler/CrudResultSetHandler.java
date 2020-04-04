@@ -45,14 +45,14 @@ public class CrudResultSetHandler implements ResultSetHandler {
                 if(columns.contains(columnName)){
                     setFlag = true;
                     if(converter != null){
-                        value = converter.getObject(resultSet,columnName);
+                        value = converter.getObject(resultSet,columnName,columnMeta.getType());
                     }else{
                         value = JdbcUtils.getObject(resultSet,columnName,columnMeta.getType());
                     }
                 }else if(columns.contains(columnName.toUpperCase())){
                     setFlag = true;
                     if(converter != null){
-                        value = converter.getObject(resultSet,columnName.toUpperCase());
+                        value = converter.getObject(resultSet,columnName.toUpperCase(),columnMeta.getType());
                     }else{
                         value = JdbcUtils.getObject(resultSet,columnName.toUpperCase(),columnMeta.getType());
                     }

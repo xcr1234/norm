@@ -57,11 +57,8 @@ public class ErrorContext {
         return params;
     }
 
-    public void addParam(Object arg){
-        if(params == null){
-            params = new ArrayList<Object>();
-        }
-        params.add(arg);
+    public void setParams(List<Object> params) {
+        this.params = params;
     }
 
     public Parameter getParameter() {

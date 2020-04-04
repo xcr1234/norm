@@ -12,7 +12,7 @@ import java.util.Date;
 public class Long2DateConverter implements TypeConverter<Date> {
 
     @Override
-    public Date getObject(ResultSet resultSet, String column) throws SQLException {
+    public Date getObject(ResultSet resultSet, String column,Class<Date> requiredType) throws SQLException {
         long l = resultSet.getLong(column);
         if(resultSet.wasNull()){
             return null;

@@ -3,6 +3,8 @@ package norm;
 
 import norm.core.executor.ExecutorFactory;
 import norm.core.executor.DefaultExecutorFactory;
+import norm.core.id.DefaultIdGenerator;
+import norm.core.id.IdGenerator;
 import norm.core.log.SqlLogger;
 import norm.core.log.DefaultSqlLogger;
 import norm.exception.ExecutorException;
@@ -23,11 +25,13 @@ public class Configuration {
     private boolean showSql;
     private boolean formatSql;
     private PageSql pageSql;
+    private boolean getGenerateId = true;
     private SqlLogger sqlLogger = new DefaultSqlLogger();
     private SQLFormatter sqlFormatter = new BasicFormatterImpl();
     private ExecutorFactory executorFactory = new DefaultExecutorFactory();
     private NameStrategy tableNameStrategy = new DefaultTableNameStrategy();
     private NameStrategy columnNameStrategy = new DefaultTableNameStrategy();
+    private IdGenerator idGenerator = new DefaultIdGenerator();
     private String schema;
     private int jdbcNullType = Types.OTHER;
 
@@ -67,6 +71,14 @@ public class Configuration {
         this.columnNameStrategy = columnNameStrategy;
     }
 
+    public IdGenerator getIdGenerator() {
+        return idGenerator;
+    }
+
+    public void setIdGenerator(IdGenerator idGenerator) {
+        this.idGenerator = idGenerator;
+    }
+
     public boolean isShowSql() {
         return showSql;
     }
@@ -85,6 +97,14 @@ public class Configuration {
 
     public SqlLogger getSqlLogger() {
         return sqlLogger;
+    }
+
+    public boolean isGetGenerateId() {
+        return getGenerateId;
+    }
+
+    public void setGetGenerateId(boolean getGenerateId) {
+        this.getGenerateId = getGenerateId;
     }
 
     public void setSqlLogger(SqlLogger sqlLogger) {

@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public interface TypeConverter<T> {
 
-    T getObject(ResultSet resultSet,String column) throws SQLException;
+    T getObject(ResultSet resultSet,String column,Class<T> requiredType) throws SQLException;
 
     void setParameter(PreparedStatement ps,int index,T value) throws SQLException;
 

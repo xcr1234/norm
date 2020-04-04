@@ -19,12 +19,16 @@ public class ColumnValueParameter implements Parameter{
     @SuppressWarnings("unchecked")
     @Override
     public void setParameter(PreparedStatement ps, int index) throws SQLException {
-        ErrorContext.instance().addParam(value);
         if(columnMeta.getTypeConverter() != null){
             columnMeta.getTypeConverter().setParameter(ps,index,value);
         }else{
             JdbcUtils.setParameter(ps,index,value,columnMeta.getConfiguration().getJdbcNullType(),columnMeta.getJdbcType());
         }
+    }
+
+    @Override
+    public Object getValue() {
+        return value;
     }
 
     @Override
