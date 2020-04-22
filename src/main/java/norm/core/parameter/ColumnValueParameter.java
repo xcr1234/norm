@@ -22,7 +22,7 @@ public class ColumnValueParameter implements Parameter{
         if(columnMeta.getTypeConverter() != null){
             columnMeta.getTypeConverter().setParameter(ps,index,value);
         }else{
-            JdbcUtils.setParameter(ps,index,value,columnMeta.getConfiguration().getJdbcNullType(),columnMeta.getJdbcType());
+            JdbcUtils.setParameter(ps,index,value,columnMeta.getNorm().getJdbcNullType(),columnMeta.getJdbcType());
         }
     }
 

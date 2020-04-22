@@ -1,6 +1,5 @@
 package norm.core.interceptor;
 
-import norm.Configuration;
 import norm.JdbcTemplate;
 import norm.Norm;
 import norm.QueryWrapper;
@@ -17,6 +16,7 @@ import norm.util.ErrorContext;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
 public class CrudProxyImpl implements CrudProxy {
@@ -29,7 +29,7 @@ public class CrudProxyImpl implements CrudProxy {
     public CrudProxyImpl(Norm norm, QueryGenerator generator) {
         this.norm = norm;
         this.generator = generator;
-        this.executor = norm.getConfiguration().getExecutorFactory().getExecutor(norm);
+        this.executor = norm.getExecutorFactory().getExecutor(norm);
         this.jdbcTemplate = new JdbcTemplateImpl<Object>(this);
     }
 
@@ -38,9 +38,7 @@ public class CrudProxyImpl implements CrudProxy {
         return norm;
     }
 
-    public Configuration getConfiguration() {
-        return norm.getConfiguration();
-    }
+
     @Override
     public QueryGenerator getGenerator() {
         return generator;
@@ -103,7 +101,13 @@ public class CrudProxyImpl implements CrudProxy {
             }
             connection = openConnection();
             executor.processPage(connection,query,page);
-            List<T> list = executor.selectList(connection,query);
+            List<T> list;
+            if(page.isEvalCount() && page.getTotal() == 0){
+                //新增：当总数为0时，不再请求
+                list = Collections.emptyList();
+            }else{
+                list = executor.selectList(connection,query);
+            }
             page.setRecords(list);
             return list;
         }catch (Exception e){

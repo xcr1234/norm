@@ -3,37 +3,67 @@ package norm;
 import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.NoOp;
+import norm.anno.FieldStrategy;
+import norm.core.executor.DefaultExecutorFactory;
 import norm.core.executor.ExecutorFactory;
 import norm.core.generator.DefaultGeneratorFactory;
 import norm.core.generator.QueryGenerator;
 import norm.core.generator.QueryGeneratorFactory;
+import norm.core.id.DefaultIdGenerator;
 import norm.core.id.IdGenerator;
 import norm.core.interceptor.CrudProxyImpl;
 import norm.core.interceptor.CrudDaoInterceptor;
 import norm.core.interceptor.CrudProxy;
+import norm.core.log.DefaultSqlLogger;
 import norm.core.log.SqlLogger;
 import norm.core.meta.Meta;
 import norm.exception.DefaultExceptionTranslator;
 import norm.exception.ExceptionTranslator;
+import norm.exception.ExecutorException;
 import norm.exception.SpringExceptionTranslator;
+import norm.naming.DefaultTableNameStrategy;
 import norm.naming.NameStrategy;
 import norm.page.PageSql;
+import norm.page.PageUtil;
 import norm.page.impl.*;
 import norm.util.*;
+import norm.util.sql.BasicFormatterImpl;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 public class Norm {
-    private ExceptionTranslator exceptionTranslator = initExceptionTranslator();
-    private Configuration configuration = new Configuration();
+    private boolean driverFlag;
+    private boolean showSql;
+    private boolean formatSql;
+    private PageSql pageSql;
+    private boolean getGenerateId = true;
+    private SqlLogger sqlLogger = new DefaultSqlLogger();
+    private SQLFormatter sqlFormatter = new BasicFormatterImpl();
+    private ExecutorFactory executorFactory = new DefaultExecutorFactory();
+    private NameStrategy tableNameStrategy = new DefaultTableNameStrategy();
+    private NameStrategy columnNameStrategy = new DefaultTableNameStrategy();
+    private IdGenerator idGenerator = new DefaultIdGenerator();
+    private String schema;
+    private int jdbcNullType = Types.OTHER;
+    private FieldStrategy insertStrategy;
+    private FieldStrategy updateStrategy;
+
+    //connection configurations:
+    private DataSource dataSource;
+    private String driverClass;
+    private String url;
+    private String username;
+    private String password;
+    private Properties connProperties;
+    private ExceptionTranslator exceptionTranslator = new DefaultExceptionTranslator();
     private QueryGeneratorFactory generatorFactory = new DefaultGeneratorFactory(this);
     private Map<Class, Object> daoCache = new HashMap<Class, Object>();
     private ThreadLocal<TransactionManager> managerThreadLocal = new ThreadLocal<TransactionManager>() {
@@ -42,139 +72,185 @@ public class Norm {
             return new TransactionManager();
         }
     };
-    protected static Map<String, PageSql> pageSqlMap = new HashMap<String,PageSql>();
-    static {
-        pageSqlMap.put("H2",new H2Page());
-        pageSqlMap.put("MySQL",new MySQLPage());
-        pageSqlMap.put("Oracle",new OraclePage());
-        pageSqlMap.put("PostgreSQL",new PostgreSQLPage());
-        pageSqlMap.put("Microsoft SQL Server",new SQLServerPage());
-        Db2Page db2Page = new Db2Page();
-        pageSqlMap.put("DB2",db2Page);
-        pageSqlMap.put("DB2/NT",db2Page);
-        pageSqlMap.put("DB2/NT64",db2Page);
-        pageSqlMap.put("DB2 UDP",db2Page);
-        pageSqlMap.put("DB2/LINUX",db2Page);
-        pageSqlMap.put("DB2/LINUX390",db2Page);
-        pageSqlMap.put("DB2/LINUXX8664",db2Page);
-        pageSqlMap.put("DB2/LINUXZ64",db2Page);
-        pageSqlMap.put("DB2/LINUXPPC64",db2Page);
-        pageSqlMap.put("DB2/LINUXPPC64LE",db2Page);
-        pageSqlMap.put("DB2/400 SQL",db2Page);
-        pageSqlMap.put("DB2/6000",db2Page);
-        pageSqlMap.put("DB2 UDB iSeries",db2Page);
-        pageSqlMap.put("DB2/AIX64",db2Page);
-        pageSqlMap.put("DB2/HPUX",db2Page);
-        pageSqlMap.put("DB2/HP64",db2Page);
-        pageSqlMap.put("DB2/SUN",db2Page);
-        pageSqlMap.put("DB2/SUN64",db2Page);
-        pageSqlMap.put("DB2/PTX",db2Page);
-        pageSqlMap.put("DB2/2",db2Page);
-        pageSqlMap.put("DB2 UDB AS400", db2Page);
-    }
+    private Map<Class,Meta> metaMap = Collections.synchronizedMap(new HashMap<Class,Meta>());
 
-    protected ExceptionTranslator initExceptionTranslator() {
-        return new DefaultExceptionTranslator();
+    public Norm(){
+
     }
 
     public ExceptionTranslator getExceptionTranslator(){
         return this.exceptionTranslator;
     }
 
-
-    public Configuration getConfiguration() {
-        return configuration;
+    public Meta getMeta(Class type){
+        Meta meta = metaMap.get(type);
+        if(meta == null){
+            meta = new Meta(type,this);
+            metaMap.put(type,meta);
+        }
+        return meta;
     }
 
-    public void setConfiguration(Configuration configuration) {
-        this.configuration = configuration;
-    }
-
-    public NameStrategy getTableNameStrategy() {
-        return configuration.getTableNameStrategy();
-    }
-
-    public void setTableNameStrategy(NameStrategy tableNameStrategy) {
-        configuration.setTableNameStrategy(tableNameStrategy);
-    }
-
-    public NameStrategy getColumnNameStrategy() {
-        return configuration.getColumnNameStrategy();
-    }
-
-    public void setColumnNameStrategy(NameStrategy columnNameStrategy) {
-        configuration.setColumnNameStrategy(columnNameStrategy);
-    }
-
-    public IdGenerator getIdGenerator() {
-        return configuration.getIdGenerator();
-    }
-
-    public void setIdGenerator(IdGenerator idGenerator) {
-        configuration.setIdGenerator(idGenerator);
-    }
 
     public boolean isShowSql() {
-        return configuration.isShowSql();
+        return showSql;
     }
+
     public void setShowSql(boolean showSql) {
-        configuration.setShowSql(showSql);
+        this.showSql = showSql;
     }
 
-    public SqlLogger getSqlLogger() {
-        return configuration.getSqlLogger();
+    public boolean isFormatSql() {
+        return formatSql;
     }
 
-    public void setSqlLogger(SqlLogger sqlLogger) {
-        configuration.setSqlLogger(sqlLogger);
+    public void setFormatSql(boolean formatSql) {
+        this.formatSql = formatSql;
     }
 
     public PageSql getPageSql() {
-        return configuration.getPageSql();
+        return pageSql;
     }
 
     public void setPageSql(PageSql pageSql) {
-        configuration.setPageSql(pageSql);
+        this.pageSql = pageSql;
     }
 
     public boolean isGetGenerateId() {
-        return configuration.isGetGenerateId();
+        return getGenerateId;
     }
 
     public void setGetGenerateId(boolean getGenerateId) {
-        configuration.setGetGenerateId(getGenerateId);
+        this.getGenerateId = getGenerateId;
+    }
+
+    public SqlLogger getSqlLogger() {
+        return sqlLogger;
+    }
+
+    public void setSqlLogger(SqlLogger sqlLogger) {
+        this.sqlLogger = sqlLogger;
+    }
+
+    public SQLFormatter getSqlFormatter() {
+        return sqlFormatter;
+    }
+
+    public void setSqlFormatter(SQLFormatter sqlFormatter) {
+        this.sqlFormatter = sqlFormatter;
     }
 
     public ExecutorFactory getExecutorFactory() {
-        return configuration.getExecutorFactory();
+        return executorFactory;
     }
 
     public void setExecutorFactory(ExecutorFactory executorFactory) {
-        configuration.setExecutorFactory(executorFactory);
+        this.executorFactory = executorFactory;
+    }
+
+    public NameStrategy getTableNameStrategy() {
+        return tableNameStrategy;
+    }
+
+    public void setTableNameStrategy(NameStrategy tableNameStrategy) {
+        this.tableNameStrategy = tableNameStrategy;
+    }
+
+    public NameStrategy getColumnNameStrategy() {
+        return columnNameStrategy;
+    }
+
+    public void setColumnNameStrategy(NameStrategy columnNameStrategy) {
+        this.columnNameStrategy = columnNameStrategy;
+    }
+
+    public IdGenerator getIdGenerator() {
+        return idGenerator;
+    }
+
+    public void setIdGenerator(IdGenerator idGenerator) {
+        this.idGenerator = idGenerator;
     }
 
     public String getSchema() {
-        return configuration.getSchema();
+        return schema;
     }
 
     public void setSchema(String schema) {
-        configuration.setSchema(schema);
+        this.schema = schema;
     }
 
     public int getJdbcNullType() {
-        return configuration.getJdbcNullType();
+        return jdbcNullType;
     }
 
     public void setJdbcNullType(int jdbcNullType) {
-        configuration.setJdbcNullType(jdbcNullType);
+        this.jdbcNullType = jdbcNullType;
+    }
+
+    public FieldStrategy getInsertStrategy() {
+        return insertStrategy;
+    }
+
+    public void setInsertStrategy(FieldStrategy insertStrategy) {
+        this.insertStrategy = insertStrategy;
+    }
+
+    public FieldStrategy getUpdateStrategy() {
+        return updateStrategy;
+    }
+
+    public void setUpdateStrategy(FieldStrategy updateStrategy) {
+        this.updateStrategy = updateStrategy;
     }
 
     public DataSource getDataSource() {
-        return configuration.getDataSource();
+        return dataSource;
     }
 
     public void setDataSource(DataSource dataSource) {
-        configuration.setDataSource(dataSource);
+        this.dataSource = dataSource;
+    }
+
+    public String getDriverClass() {
+        return driverClass;
+    }
+
+    public void setDriverClass(String driverClass) {
+        this.driverClass = driverClass;
+        this.driverFlag = false;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Properties getConnProperties() {
+        return connProperties;
+    }
+
+    public void setConnProperties(Properties connProperties) {
+        this.connProperties = connProperties;
     }
 
     public QueryGeneratorFactory getGeneratorFactory() {
@@ -185,28 +261,38 @@ public class Norm {
         this.generatorFactory = generatorFactory;
     }
 
-    public SQLFormatter getSqlFormatter() {
-        return configuration.getSqlFormatter();
-    }
+    public Connection newConnection() throws SQLException{
+        if(dataSource != null){
+            if(username != null && password != null){
+                return dataSource.getConnection(username,password);
+            }
+            return dataSource.getConnection();
+        }
+        if(driverClass != null && !driverFlag){
+            Class<?> clazz = ReflectUtils.getClassOrNull(driverClass);
+            if(clazz != null){
+                driverFlag = true;
+            }else{
+                throw new ExecutorException("register driver failed , class not found :" + driverClass);
+            }
+        }
 
-    public void setSqlFormatter(SQLFormatter sqlFormatter) {
-        configuration.setSqlFormatter(sqlFormatter);
-    }
-
-    public boolean isFormatSql() {
-        return configuration.isFormatSql();
-    }
-
-    public void setFormatSql(boolean formatSql) {
-        configuration.setFormatSql(formatSql);
-    }
-
-    public boolean isUpdateNulls() {
-        return configuration.isUpdateNulls();
-    }
-
-    public void setUpdateNulls(boolean updateNulls) {
-        configuration.setUpdateNulls(updateNulls);
+        if(url == null){
+            throw new ExecutorException("the jdbc url or dataSource of norm not configured!");
+        }
+        Properties properties = null;
+        if(connProperties != null){
+            properties = new Properties(connProperties);
+        }else{
+            properties = new Properties();
+        }
+        if(username != null){
+            properties.put("user",username);
+        }
+        if(password != null){
+            properties.put("password",password);
+        }
+        return DriverManager.getConnection(url,properties);
     }
 
     /**
@@ -219,7 +305,7 @@ public class Norm {
         Connection connection = manager.getConnection();
         if(JdbcUtils.connClosed(connection)){
             ErrorContext.instance().setState("open connection");
-            connection = configuration.newConnection();
+            connection = newConnection();
             manager.setConnection(connection);
             if(manager.isBegin()){
                 connection.setAutoCommit(false);
@@ -238,7 +324,7 @@ public class Norm {
         DatabaseMetaData databaseMetaData = connection.getMetaData();
         String databaseProductName = databaseMetaData.getDatabaseProductName();
         if(databaseProductName != null){
-            PageSql pageSql = pageSqlMap.get(databaseProductName);
+            PageSql pageSql = PageUtil.getPageSql(databaseProductName);
             if(pageSql != null){
                 setPageSql(pageSql);
             }
@@ -371,7 +457,7 @@ public class Norm {
         if (Modifier.isFinal(tClass.getModifiers()) || Modifier.isAbstract(tClass.getModifiers())) {
             throw new IllegalArgumentException("entity class can't be final or abstract :" + tClass);
         }
-        Meta meta = Meta.parse(tClass, configuration);
+        Meta meta = Meta.parse(tClass, this);
         if (meta.getIdColumn().getType() != idClass) {
             throw new IllegalArgumentException("illegal bean,id type mismatch :" + tClass + ",dao:" + daoClass);
         }
@@ -393,5 +479,6 @@ public class Norm {
     protected CrudProxy createCrudProxy(QueryGenerator generator){
         return new CrudProxyImpl(this, generator);
     }
+
 
 }

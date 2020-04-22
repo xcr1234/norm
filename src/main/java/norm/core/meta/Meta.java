@@ -1,7 +1,7 @@
 package norm.core.meta;
 
 
-import norm.Configuration;
+import norm.Norm;
 import norm.anno.AfterInstance;
 import norm.anno.Id;
 import norm.anno.Table;
@@ -20,22 +20,24 @@ import java.util.*;
 public final class Meta {
 
 
-    private static Map<Class,Meta> map = Collections.synchronizedMap(new HashMap<Class,Meta>());
-    private Configuration configuration;
+    private final Norm norm;
+    private final Class clazz;
+    private ColumnMeta idColumn;
+    private Map<String,ColumnMeta> columnMetas = new LinkedHashMap<String,ColumnMeta>();
+
+    private NameStrategy tableNameStrategy;
+    private NameStrategy columnNameStrategy;
+
 
 
     private List<Method> afterInstanceMethods = new ArrayList<Method>();
 
 
-    public static Meta parse(Class clazz,Configuration configuration){
+
+    public static Meta parse(Class clazz,Norm norm){
         Args.notNull(clazz,"class");
-        Args.notNull(configuration,"configuration");
-        Meta meta = map.get(clazz);
-        if(meta == null){
-            meta = new Meta(clazz,configuration);
-            map.put(clazz,meta);
-        }
-        return meta;
+        Args.notNull(norm,"norm");
+        return norm.getMeta(clazz);
     }
 
 
@@ -144,16 +146,16 @@ public final class Meta {
     }
 
 
-    private Meta(Class clazz,Configuration configuration){
+    public Meta(Class clazz,Norm norm){
 
         this.clazz = clazz;
-        this.configuration = configuration;
+        this.norm = norm;
         init();
 
     }
 
     public NameStrategy getTableNameStrategy() {
-        return configuration.getTableNameStrategy();
+        return norm.getTableNameStrategy();
     }
 
     private boolean ref = false;
@@ -171,13 +173,10 @@ public final class Meta {
         }
     }
 
-    public Configuration getConfiguration() {
-        return configuration;
+    public Norm getNorm() {
+        return norm;
     }
 
-    private ColumnMeta idColumn;
-    private Class clazz;
-    private Map<String,ColumnMeta> columnMetas = new LinkedHashMap<String,ColumnMeta>();
 
     public ColumnMeta getIdColumn() {
         return idColumn;
@@ -191,8 +190,6 @@ public final class Meta {
         return columnMetas;
     }
 
-    private NameStrategy tableNameStrategy;
-    private NameStrategy columnNameStrategy;
 
     public NameStrategy getColumnNameStrategy() {
         Table table = (Table)clazz.getAnnotation(Table.class);
@@ -207,10 +204,10 @@ public final class Meta {
     }
 
     public String getTableName() {
-        String globalSchema = configuration.getSchema();
+        String globalSchema = norm.getSchema();
         String schema = null;
         String columnName = null;
-        NameStrategy nameStrategy = configuration.getTableNameStrategy();
+        NameStrategy nameStrategy = norm.getTableNameStrategy();
         if(clazz.isAnnotationPresent(Table.class)){
             Table table = (Table)clazz.getAnnotation(Table.class);
             if(table.tableNameStrategy() != NameStrategy.class){

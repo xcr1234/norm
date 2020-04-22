@@ -48,4 +48,22 @@ public @interface Column {
      * @return 必须是{@link java.sql.Types}中的常量值
      */
     int jdbcType() default Integer.MAX_VALUE;
+
+    /**
+     * 插入实体时字段的策略
+     * @return
+     */
+    FieldStrategy insertStrategy() default FieldStrategy.DEFAULT;
+
+    /**
+     * 更新实体时字段的策略
+     * @return
+     */
+    FieldStrategy updateStrategy() default FieldStrategy.DEFAULT;
+
+    /**
+     * 查询时列的条件
+     * @return 默认为等于
+     */
+    Condition condition() default Condition.EQ;
 }

@@ -35,6 +35,7 @@ public class DefaultExecutor implements Executor {
             errorContext.setState(ErrorContext.EXECUTE_UPDATE);
             int r = ps.executeUpdate();
             if (r > 0 && query.getReturnGenerateId() != null) {
+                errorContext.setState("get generated keys");
                 ColumnMeta idColumn = query.getReturnGenerateId().getIdColumn();
                 Object value = norm.getIdGenerator().getValue(ps, query.getReturnGenerateId());
                 if (value != null) {
@@ -157,7 +158,7 @@ public class DefaultExecutor implements Executor {
         ErrorContext errorContext = ErrorContext.instance();
         String sql = query.getSql();
         if (norm.isShowSql()) {
-            if (norm.getConfiguration().isFormatSql()) {
+            if (norm.isFormatSql()) {
                 norm.getSqlLogger().log(norm.getSqlFormatter().format(sql));
             } else {
                 norm.getSqlLogger().log(sql);
