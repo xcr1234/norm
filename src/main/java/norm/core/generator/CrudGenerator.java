@@ -2,18 +2,13 @@ package norm.core.generator;
 
 import norm.Norm;
 import norm.QueryWrapper;
-import norm.anno.Id;
-import norm.anno.OrderBy;
-import norm.anno.OrderBys;
+import norm.anno.*;
 import norm.core.handler.CrudResultSetHandler;
 import norm.core.handler.ResultSetHandler;
 import norm.core.handler.SingleValueResultSetHandler;
 import norm.core.meta.ColumnMeta;
 import norm.core.meta.Meta;
-import norm.core.parameter.ArrayParameters;
-import norm.core.parameter.ColumnPropertyParameter;
-import norm.core.parameter.ColumnValueParameter;
-import norm.core.parameter.Parameter;
+import norm.core.parameter.*;
 import norm.core.query.ReturnGenerateId;
 import norm.core.query.SelectQuery;
 import norm.core.query.SelectQueryMiddle;
@@ -127,10 +122,10 @@ public class CrudGenerator implements QueryGenerator {
                 Object value = columnMeta.get(object);
                 Id id = columnMeta.getAnnotation(Id.class);
                 boolean idValueFlag = false;
-                if(id != null && !id.value().isEmpty()){
+                if (id != null && !id.value().isEmpty()) {
                     idValueFlag = true;
                 }
-                if (idValueFlag || columnMeta.insert() && columnMeta.strategyValue(columnMeta.getInsertStrategy(),value)) {
+                if (idValueFlag || columnMeta.insert() && columnMeta.strategyValue(columnMeta.getInsertStrategy(), value)) {
                     updateFlag = false;
                     if (id == null) {
                         VALUES(columnMeta.getColumnName(), "?");
@@ -191,8 +186,8 @@ public class CrudGenerator implements QueryGenerator {
     }
 
 
-    protected SelectQuery<Integer> exists(final Object object) {
-        if (object == null) {
+    protected SelectQuery<Integer> exists(final Object id) {
+        if (id == null) {
             throw new IllegalArgumentException("cannot select exists while id is null!");
         }
         SelectQuery<Integer> selectQuery = new SelectQuery<Integer>();
@@ -201,9 +196,78 @@ public class CrudGenerator implements QueryGenerator {
             FROM(meta.getTableName());
             WHERE(meta.getIdColumn().getColumnName() + " = ?");
         }}.toString());
-        selectQuery.setParameters(Collections.<Parameter>singletonList(new ColumnValueParameter(meta.getIdColumn(), object)));
+        selectQuery.setParameters(Collections.<Parameter>singletonList(new ValueParameter(meta.getIdColumn().getName(), id, norm.getJdbcNullType())));
         selectQuery.setResultSetHandler(new SingleValueResultSetHandler<Integer>(Integer.class));
         return selectQuery;
+    }
+
+    protected void whereCondition(ColumnMeta columnMeta, SQL sql, List<Parameter> parameters, Object value) {
+        Column column = columnMeta.getAnnotation(Column.class);
+        boolean nullWhere = false;
+        Condition condition = Condition.EQ;
+        if (column != null) {
+            nullWhere = column.nullWhere();
+            condition = column.condition();
+        }
+        if (condition == Condition.EQ) {
+            if (value == null) {
+                if (nullWhere) {
+                    sql.WHERE(columnMeta.getColumnName() + " is null");
+                }
+            } else {
+                sql.WHERE(columnMeta.getColumnName() + " = ?");
+                parameters.add(new ColumnValueParameter(columnMeta, value));
+            }
+        } else if (condition == Condition.NE) {
+            if (value == null) {
+                if (nullWhere) {
+                    sql.WHERE(columnMeta.getColumnName() + " is not null");
+                }
+            } else {
+                sql.WHERE(columnMeta.getColumnName() + " <> ?");
+                parameters.add(new ColumnValueParameter(columnMeta, value));
+            }
+        } else if (column.condition() == Condition.LIKE) {
+            if (value == null) {
+                if (nullWhere) {
+                    sql.WHERE(columnMeta.getColumnName() + " like '%%'");
+                }
+            } else {
+                sql.WHERE(columnMeta.getColumnName() + " like ?");
+                parameters.add(new ColumnValueParameter(columnMeta, "%" + value + "%"));
+            }
+        } else if (column.condition() == Condition.LIKE_LEFT) {
+            if (value == null) {
+                if (nullWhere) {
+                    sql.WHERE(columnMeta.getColumnName() + " like '%'");
+                }
+            } else {
+                sql.WHERE(columnMeta.getColumnName() + " like ?");
+                parameters.add(new ColumnValueParameter(columnMeta, "%" + value));
+            }
+        } else if (column.condition() == Condition.LIKE_RIGHT) {
+            if (value == null) {
+                if (nullWhere) {
+                    sql.WHERE(columnMeta.getColumnName() + " like '%'");
+                }
+            } else {
+                sql.WHERE(columnMeta.getColumnName() + " like ?");
+                parameters.add(new ColumnValueParameter(columnMeta, value + "%"));
+            }
+        } else if (column.condition() == Condition.LIKE_MANUAL) {
+            if (value == null) {
+                if (nullWhere) {
+                    sql.WHERE(columnMeta.getColumnName() + " like '%'");
+                }
+            } else {
+                sql.WHERE(columnMeta.getColumnName() + " like ?");
+                parameters.add(new ColumnValueParameter(columnMeta, value));
+            }
+        }else if(column.condition() == Condition.NULL){
+            sql.WHERE(columnMeta.getColumnName() + " is null");
+        }else if(column.condition() == Condition.NOT_NULL){
+            sql.WHERE(columnMeta.getColumnName() + " is not null");
+        }
     }
 
     protected SelectQuery<Integer> count(final Object object) {
@@ -216,10 +280,7 @@ public class CrudGenerator implements QueryGenerator {
                 for (ColumnMeta columnMeta : meta.getColumnMetas().values()) {
                     if (columnMeta.select()) {
                         Object value = columnMeta.get(object);
-                        if (value != null) {
-                            WHERE(columnMeta.getColumnName() + " = ?");
-                            parameters.add(new ColumnValueParameter(columnMeta, value));
-                        }
+                        whereCondition(columnMeta,this,parameters,value);
                     }
                 }
             }
@@ -290,10 +351,7 @@ public class CrudGenerator implements QueryGenerator {
         for (ColumnMeta column : meta.getColumnMetas().values()) {
             if (column.select() && !column.isJoinColumn()) {
                 Object value = column.get(object);
-                if (value != null) {
-                    sql.WHERE(column.getColumnName() + " = ?");
-                    parameters.add(new ColumnPropertyParameter(column, object));
-                }
+                whereCondition(column,sql,parameters,value);
             }
         }
         SelectQueryMiddle<Object> query = new SelectQueryMiddle<Object>(sql);

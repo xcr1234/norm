@@ -35,6 +35,7 @@ public abstract class Service<T, ID> implements BaseService<T, ID> {
         return dao.update(t);
     }
     @Override
+    @Deprecated
     public boolean exists(ID id) {
         return dao.exists(id);
     }

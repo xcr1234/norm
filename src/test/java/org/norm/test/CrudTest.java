@@ -134,6 +134,7 @@ public class CrudTest extends BaseConnTest {
         norm.commit();
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testExists() {
         System.out.println(carDao.exists(1));

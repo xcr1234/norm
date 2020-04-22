@@ -45,9 +45,11 @@ public interface CrudDao <T,ID>{
 
     /**
      * 判断实体id是否在数据表中
+     * @deprecated 请使用findOne或者count方法（传对象），这个方法只能传ID
      * @param id 实体对象的id
      * @return id是否在数据表
      */
+    @Deprecated
     boolean exists(ID id);
 
     /**

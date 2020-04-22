@@ -66,4 +66,10 @@ public @interface Column {
      * @return 默认为等于
      */
     Condition condition() default Condition.EQ;
+
+    /**
+     * 当为null时是否加入where条件中，默认为false
+     * @return 如果为true，当为null时，会在where加入is null条件（如果condition为NE则加入is not null，如果condition为like会like %%）
+     */
+    boolean nullWhere() default false;
 }

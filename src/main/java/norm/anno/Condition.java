@@ -13,7 +13,33 @@ public enum Condition {
      */
     NE,
     /**
-     * 约等于%%
+     * like查询，自动在两边加上%%
      */
-    LIKE;
+    LIKE,
+    /**
+     * like查询，在左边加上%
+     */
+    LIKE_LEFT,
+
+    /**
+     * like查询，在右边加上%
+     */
+    LIKE_RIGHT,
+
+    /**
+     * like查询，手动加上%或者_
+     */
+    LIKE_MANUAL,
+
+    /**
+     * is null，会忽略value值和nullWhere
+     */
+    NULL,
+
+    /**
+     * is not null，会忽略value值和nullWhere
+     */
+    NOT_NULL
+
+
 }
