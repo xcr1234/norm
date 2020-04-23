@@ -52,13 +52,7 @@ public final class JdbcUtils {
     public static void setParameter(PreparedStatement ps, int index, Object value, int nullType, Integer type) throws SQLException {
         if (value == null) {
             ps.setNull(index, nullType);
-        } else if (value.getClass().isEnum()) {
-            if (value instanceof IEnum) {
-                setParameter(ps, index, ((IEnum) value).getValue(), nullType, type);
-            } else {
-                setParameter(ps, index, ((Enum) value).name());
-            }
-        } else if (type != null) {
+        }  else if (type != null) {
             ps.setObject(index, value, type);
         } else {
             setParameter(ps, index, value);
@@ -183,29 +177,6 @@ public final class JdbcUtils {
                 return null;
             }
             return clob.getCharacterStream();
-        } else if (type.isEnum()) {
-            if (IEnum.class.isAssignableFrom(type)) {
-                Method method = ReflectUtils.getMethodOrNull(type, "getValue");
-                AssertUtils.notNull(method, "getValue() of class " + type.getName());
-                Object value = getObject(resultSet, index, method.getReturnType());
-                if (value == null) {
-                    return null;
-                }
-                Object array = type.getEnumConstants();
-                for (int i = 0; i < Array.getLength(array); i++) {
-                    IEnum iEnum = (IEnum) Array.get(array, i);
-                    if (value.equals(iEnum.getValue())) {
-                        return iEnum;
-                    }
-                }
-                return null;
-            } else {
-                String result = resultSet.getString(index);
-                if (result == null) {
-                    return null;
-                }
-                return Enum.valueOf((Class) type, result);
-            }
         }
         throw new ExecutorException("can't get object:unsupported type :" + type);
     }
@@ -284,29 +255,6 @@ public final class JdbcUtils {
                 return null;
             }
             return clob.getCharacterStream();
-        } else if (type.isEnum()) {
-            if (IEnum.class.isAssignableFrom(type)) {
-                Method method = ReflectUtils.getMethodOrNull(type, "getValue");
-                AssertUtils.notNull(method, "getValue() of class " + type.getName());
-                Object value = getObject(resultSet, index, method.getReturnType());
-                if (value == null) {
-                    return null;
-                }
-                Object array = type.getEnumConstants();
-                for (int i = 0; i < Array.getLength(array); i++) {
-                    IEnum iEnum = (IEnum) Array.get(array, i);
-                    if (value.equals(iEnum.getValue())) {
-                        return iEnum;
-                    }
-                }
-                return null;
-            } else {
-                String result = resultSet.getString(index);
-                if (result == null) {
-                    return null;
-                }
-                return Enum.valueOf((Class) type, result);
-            }
         }
         throw new ExecutorException("can't get object:unsupported type :" + type);
     }

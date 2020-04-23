@@ -4,6 +4,8 @@ import net.sf.cglib.proxy.Callback;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.NoOp;
 import norm.anno.FieldStrategy;
+import norm.convert.DefaultEnumConverter;
+import norm.convert.EnumConverter;
 import norm.core.executor.DefaultExecutorFactory;
 import norm.core.executor.ExecutorFactory;
 import norm.core.generator.DefaultGeneratorFactory;
@@ -51,6 +53,7 @@ public class Norm {
     private NameStrategy tableNameStrategy = new DefaultTableNameStrategy();
     private NameStrategy columnNameStrategy = new DefaultTableNameStrategy();
     private IdGenerator idGenerator = new DefaultIdGenerator();
+    private EnumConverter enumConverter = new DefaultEnumConverter();
     private String schema;
     private int jdbcNullType = Types.OTHER;
     private FieldStrategy insertStrategy;
@@ -202,6 +205,14 @@ public class Norm {
 
     public void setUpdateStrategy(FieldStrategy updateStrategy) {
         this.updateStrategy = updateStrategy;
+    }
+
+    public EnumConverter getEnumConverter() {
+        return enumConverter;
+    }
+
+    public void setEnumConverter(EnumConverter enumConverter) {
+        this.enumConverter = enumConverter;
     }
 
     public DataSource getDataSource() {

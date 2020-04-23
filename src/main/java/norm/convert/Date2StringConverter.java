@@ -35,7 +35,7 @@ public class Date2StringConverter implements TypeConverter<String> {
     }
 
     @Override
-    public void setParameter(PreparedStatement ps, int index, String value) throws SQLException {
+    public void setParameter(PreparedStatement ps, int index, String value,int nullType,Integer jdbcType) throws SQLException {
         if(value == null){
             ps.setNull(index, Types.TIMESTAMP);
         }else{

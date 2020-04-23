@@ -20,7 +20,7 @@ public class ColumnValueParameter implements Parameter{
     @Override
     public void setParameter(PreparedStatement ps, int index) throws SQLException {
         if(columnMeta.getTypeConverter() != null){
-            columnMeta.getTypeConverter().setParameter(ps,index,value);
+            columnMeta.getTypeConverter().setParameter(ps,index,value,columnMeta.getNorm().getJdbcNullType(),columnMeta.getJdbcType());
         }else{
             JdbcUtils.setParameter(ps,index,value,columnMeta.getNorm().getJdbcNullType(),columnMeta.getJdbcType());
         }

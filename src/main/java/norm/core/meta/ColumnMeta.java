@@ -8,6 +8,7 @@ import norm.Norm;
 import norm.TypeConverter;
 import norm.anno.*;
 import norm.naming.NameStrategy;
+import norm.util.AssertUtils;
 import norm.util.ReflectUtils;
 
 import java.lang.annotation.Annotation;
@@ -47,7 +48,7 @@ public final class ColumnMeta {
         } else if (setter != null) {
             return setter.getParameterTypes()[0];
         }
-        return null;
+        throw new IllegalStateException("parse meta error");
     }
 
     public <T extends Annotation> T getAnnotation(Class<T> type) {
@@ -259,6 +260,9 @@ public final class ColumnMeta {
     private TypeConverter<?> typeConverter;
 
     public TypeConverter getTypeConverter() {
+        if(typeConverter == null && getType().isEnum()){
+            return meta.getNorm().getEnumConverter();
+        }
         return typeConverter;
     }
 }

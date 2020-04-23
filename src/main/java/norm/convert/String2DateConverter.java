@@ -42,7 +42,7 @@ public class String2DateConverter implements TypeConverter<Date> {
     }
 
     @Override
-    public void setParameter(PreparedStatement ps, int index, Date value) throws SQLException {
+    public void setParameter(PreparedStatement ps, int index, Date value,int nullType,Integer jdbcType) throws SQLException {
         if(value == null){
             ps.setString(index,null);
         }else{

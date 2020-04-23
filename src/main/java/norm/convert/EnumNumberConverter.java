@@ -14,7 +14,7 @@ import java.sql.Types;
 /**
  * 数据库是int,实体是Enum的转换器
  */
-public class EnumNumberConverter implements TypeConverter<Enum> {
+public class EnumNumberConverter implements EnumConverter {
 
 
     @Override
@@ -28,7 +28,7 @@ public class EnumNumberConverter implements TypeConverter<Enum> {
     }
 
     @Override
-    public void setParameter(PreparedStatement ps, int index, Enum value) throws SQLException {
+    public void setParameter(PreparedStatement ps, int index, Enum value,int nullType,Integer jdbcType) throws SQLException {
         if (value == null) {
             ps.setNull(index, Types.INTEGER);
         } else {

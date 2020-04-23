@@ -23,7 +23,7 @@ public class ColumnPropertyParameter implements Parameter {
     public void setParameter(PreparedStatement ps, int index) throws SQLException {
         Object value = columnMeta.get(object);
         if(columnMeta.getTypeConverter() != null){
-            columnMeta.getTypeConverter().setParameter(ps,index,value);
+            columnMeta.getTypeConverter().setParameter(ps,index,value,columnMeta.getNorm().getJdbcNullType(),columnMeta.getJdbcType());
         }else{
             JdbcUtils.setParameter(ps,index,value,columnMeta.getNorm().getJdbcNullType(),columnMeta.getJdbcType());
         }

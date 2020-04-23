@@ -18,7 +18,7 @@ public class Date2LongConverter implements TypeConverter<Long> {
     }
 
     @Override
-    public void setParameter(PreparedStatement ps, int index, Long value) throws SQLException {
+    public void setParameter(PreparedStatement ps, int index, Long value,int nullType,Integer jdbcType) throws SQLException {
         if(value == null){
             ps.setNull(index, Types.TIMESTAMP);
         }else{
