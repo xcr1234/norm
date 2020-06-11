@@ -55,9 +55,9 @@ public class Norm {
     private IdGenerator idGenerator = new DefaultIdGenerator();
     private EnumConverter enumConverter = new DefaultEnumConverter();
     private String schema;
-    private int jdbcNullType = Types.OTHER;
-    private FieldStrategy insertStrategy;
-    private FieldStrategy updateStrategy;
+    private int jdbcNullType = Types.NULL;
+    private FieldStrategy insertStrategy = FieldStrategy.NOT_NULL;
+    private FieldStrategy updateStrategy = FieldStrategy.NOT_NULL;
 
     //connection configurations:
     private DataSource dataSource;
@@ -116,6 +116,7 @@ public class Norm {
     }
 
     public void setPageSql(PageSql pageSql) {
+        AssertUtils.notNull(pageSql,"the page sql object");
         this.pageSql = pageSql;
     }
 
@@ -132,6 +133,7 @@ public class Norm {
     }
 
     public void setSqlLogger(SqlLogger sqlLogger) {
+        AssertUtils.notNull(sqlLogger,"the sqlLogger");
         this.sqlLogger = sqlLogger;
     }
 
@@ -140,6 +142,7 @@ public class Norm {
     }
 
     public void setSqlFormatter(SQLFormatter sqlFormatter) {
+        AssertUtils.notNull(sqlFormatter,"the sqlFormatter");
         this.sqlFormatter = sqlFormatter;
     }
 
@@ -148,6 +151,7 @@ public class Norm {
     }
 
     public void setExecutorFactory(ExecutorFactory executorFactory) {
+        AssertUtils.notNull(executorFactory,"the executorFactory");
         this.executorFactory = executorFactory;
     }
 
@@ -156,6 +160,7 @@ public class Norm {
     }
 
     public void setTableNameStrategy(NameStrategy tableNameStrategy) {
+        AssertUtils.notNull(tableNameStrategy,"the tableNameStrategy");
         this.tableNameStrategy = tableNameStrategy;
     }
 
@@ -164,6 +169,7 @@ public class Norm {
     }
 
     public void setColumnNameStrategy(NameStrategy columnNameStrategy) {
+        AssertUtils.notNull(columnNameStrategy,"the columnNameStrategy");
         this.columnNameStrategy = columnNameStrategy;
     }
 
@@ -172,6 +178,7 @@ public class Norm {
     }
 
     public void setIdGenerator(IdGenerator idGenerator) {
+        AssertUtils.notNull(idGenerator,"the idGenerator");
         this.idGenerator = idGenerator;
     }
 
@@ -196,6 +203,7 @@ public class Norm {
     }
 
     public void setInsertStrategy(FieldStrategy insertStrategy) {
+        AssertUtils.notNull(insertStrategy,"the insertStrategy");
         this.insertStrategy = insertStrategy;
     }
 
@@ -204,6 +212,7 @@ public class Norm {
     }
 
     public void setUpdateStrategy(FieldStrategy updateStrategy) {
+        AssertUtils.notNull(updateStrategy,"the updateStrategy");
         this.updateStrategy = updateStrategy;
     }
 
@@ -212,6 +221,7 @@ public class Norm {
     }
 
     public void setEnumConverter(EnumConverter enumConverter) {
+        AssertUtils.notNull(enumConverter,"the enumConverter");
         this.enumConverter = enumConverter;
     }
 
@@ -269,6 +279,7 @@ public class Norm {
     }
 
     public void setGeneratorFactory(QueryGeneratorFactory generatorFactory) {
+        AssertUtils.notNull(generatorFactory,"the generatorFactory");
         this.generatorFactory = generatorFactory;
     }
 
