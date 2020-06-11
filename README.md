@@ -108,6 +108,12 @@ userDao.delete(user);
 userDao.deleteById(1);
 ```
 
+## 代码生成器
+
+自动生成java实体、dao、service、controller代码
+
+https://github.com/xcr1234/norm-generator
+
 ## Wiki
 
 https://gitee.com/ironV/norm/wikis
