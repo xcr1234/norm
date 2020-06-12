@@ -116,5 +116,5 @@ https://github.com/xcr1234/norm-generator
 
 ## Wiki
 
-https://gitee.com/ironV/norm/wikis
+https://gitee.com/ironV/norm/wikis/pages
 
